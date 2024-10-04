@@ -11,12 +11,17 @@ aiogram = "^3.13.1"
 psycopg = "^3.2.3"
 alembic = "^1.13.3"
 environs = "^11.0.0"
+redis = "^5.1.1"
+asyncpg = "^0.29.0"
+sqlalchemy = "^2.0.35"
 
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^7.1.1"
 pre-commit = "^3.8.0"
 isort = "^5.13.2"
+pytest = "^8.3.3"
+pytest-asyncio = "^0.24.0"
 
 [build-system]
 requires = ["poetry-core"]
