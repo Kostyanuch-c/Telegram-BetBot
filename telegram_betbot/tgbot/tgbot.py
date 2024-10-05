@@ -6,14 +6,24 @@ from aiogram import (
     Dispatcher,
 )
 from aiogram.client.default import DefaultBotProperties
-from aiogram.fsm.storage.redis import RedisStorage
+from aiogram.enums import ParseMode
+from aiogram.fsm.storage.redis import (
+    DefaultKeyBuilder,
+    RedisStorage,
+)
 from aiogram.fsm.strategy import FSMStrategy
+
+from aiogram_dialog import setup_dialogs
+from redis.asyncio.client import Redis
 
 from telegram_betbot.config_data.config import (
     Config,
     load_config,
 )
-from telegram_betbot.infrastructure.database.utils.connect_to_db import create_async_engine
+from telegram_betbot.config_data.redis_config import create_redis_connection
+from telegram_betbot.database.utils.connect_to_db import create_async_engine
+from telegram_betbot.tgbot.dialogs.start.dialogs import start_dialog
+from telegram_betbot.tgbot.handlers.commands import commands_router
 from telegram_betbot.tgbot.keyboards.menu_button import set_main_menu_button
 
 
@@ -23,15 +33,18 @@ logger = logging.getLogger(__name__)
 async def main(config: Config):
     logger.info("Starting bot")
 
+    redis: Redis = await create_redis_connection(config.redis)
+
     storage: RedisStorage = RedisStorage(
-        redis=config.redis,
+        redis=redis,
         state_ttl=config.redis.state_ttl,
         data_ttl=config.redis.data_ttl,
+        key_builder=DefaultKeyBuilder(with_destiny=True),
     )
 
     bot = Bot(
         token=config.tg_bot.token,
-        default=DefaultBotProperties(parse_mode="HTML"),
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
 
     dp = Dispatcher(
@@ -39,18 +52,22 @@ async def main(config: Config):
         fsm_strategy=FSMStrategy.CHAT,
     )
 
-    logging.info("Set main menu buttons")
+    logger.info("Set main menu buttons")
     await set_main_menu_button(bot)
-    # logger.info("Including routers")
-    # dp.include_routers(commands_router, start_dialog
+
+    logger.info("Including routers")
+    dp.include_routers(commands_router, start_dialog)
 
     # logger.info("Including middlewares")
     # dp.update.middleware(DataBaseMiddleware())
+
+    bg_factory = setup_dialogs(dp)  # noqa
 
     # Launch polling and delayed message consumer
     try:
         await dp.start_polling(
             bot,
+            # bg_factory=bg_factory,
             db=create_async_engine(
                 url=config.database.build_connection_str(),
                 echo=config.debug,
@@ -66,6 +83,6 @@ if __name__ == "__main__":
 
     logging.basicConfig(
         level=conf.logging_level,
-        format="[%(asctime)s] #%(levelname)-8s %(filename)s:" "%(lineno)d - %(name)s - %(message)s",
+        format=conf.logging_format,
     )
     asyncio.run(main(conf))

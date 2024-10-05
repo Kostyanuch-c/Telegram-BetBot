@@ -17,3 +17,13 @@ setup-pre-commit-hooks:
 	@poetry run pre-commit install
 
 install: install-dependencies setup-pre-commit-hooks
+
+
+# Alembic utils
+.PHONY: generate
+generate:
+	poetry run alembic revision --m="$(NAME)" --autogenerate
+
+.PHONY: migrate
+migrate:
+	poetry run alembic upgrade head
