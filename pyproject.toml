@@ -15,6 +15,7 @@ redis = "^5.1.1"
 asyncpg = "^0.29.0"
 sqlalchemy = "^2.0.35"
 aiogram-dialog = "^2.2.0"
+pytz = "^2024.2"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -41,7 +42,7 @@ combine_as_imports = true
 combine_star = true
 skip_gitignore = true
 balanced_wrapping = true
-force_grid_wrap = 2
+force_grid_wrap = 3
 src_paths = ["telegram_betbot", ]
 skip_glob = [
     ".git",
@@ -52,6 +53,7 @@ skip_glob = [
 known_aiogram = ["aiogram", ]
 known_aiogram_dialog = ["aiogram-dialog", ]
 known_first_party = ["telegram_betbot"]
+
 sections = [
     "FUTURE",
     "STDLIB",

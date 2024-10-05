@@ -1,9 +1,6 @@
 """Mocked Database."""
 from sqlalchemy import MetaData
-from src.db import (
-    Base,
-    Database,
-)
+from src.db import Base, Database
 
 
 class MockedDatabase(Database):

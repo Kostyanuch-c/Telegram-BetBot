@@ -1,10 +1,7 @@
 import logging
 
 from aiogram import Bot
-from aiogram.types import (
-    BotCommand,
-    BotCommandScopeDefault,
-)
+from aiogram.types import BotCommand, BotCommandScopeDefault
 
 from telegram_betbot.tgbot.lexicon.lexicon import LEXICON_COMMANDS
 

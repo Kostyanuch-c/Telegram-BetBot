@@ -1,10 +1,7 @@
 """Mocked bot."""
 from collections import deque
 from collections.abc import AsyncGenerator
-from typing import (
-    Any,
-    TYPE_CHECKING,
-)
+from typing import Any, TYPE_CHECKING
 
 from aiogram import Bot
 from aiogram.client.session.base import BaseSession
@@ -14,10 +11,7 @@ from aiogram.methods.base import (
     Response,
     TelegramType,
 )
-from aiogram.types import (
-    ResponseParameters,
-    User,
-)
+from aiogram.types import ResponseParameters, User
 from aiogram.types.base import UNSET
 
 

@@ -1,30 +1,23 @@
 import asyncio
 import logging
 
-from aiogram import (
-    Bot,
-    Dispatcher,
-)
+from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-from aiogram.fsm.storage.redis import (
-    DefaultKeyBuilder,
-    RedisStorage,
-)
+from aiogram.fsm.storage.redis import DefaultKeyBuilder, RedisStorage
 from aiogram.fsm.strategy import FSMStrategy
 
 from aiogram_dialog import setup_dialogs
 from redis.asyncio.client import Redis
+from sqlalchemy.ext.asyncio import AsyncEngine
 
-from telegram_betbot.config_data.config import (
-    Config,
-    load_config,
-)
+from telegram_betbot.config_data.config import Config, load_config
 from telegram_betbot.config_data.redis_config import create_redis_connection
-from telegram_betbot.database.utils.connect_to_db import create_async_engine
+from telegram_betbot.database.database import create_async_engine
 from telegram_betbot.tgbot.dialogs.start.dialogs import start_dialog
 from telegram_betbot.tgbot.handlers.commands import commands_router
 from telegram_betbot.tgbot.keyboards.menu_button import set_main_menu_button
+from telegram_betbot.tgbot.middlewares.database import DatabaseMiddleware
 
 
 logger = logging.getLogger(__name__)
@@ -58,24 +51,35 @@ async def main(config: Config):
     logger.info("Including routers")
     dp.include_routers(commands_router, start_dialog)
 
-    # logger.info("Including middlewares")
-    # dp.update.middleware(DataBaseMiddleware())
+    logger.info("Including middlewares")
+    dp.update.middleware(DatabaseMiddleware())
 
     bg_factory = setup_dialogs(dp)  # noqa
 
+    db_engine: AsyncEngine = create_async_engine(
+        url=config.database.build_connection_str(),
+        echo=config.debug,
+    )
     # Launch polling and delayed message consumer
     try:
         await dp.start_polling(
             bot,
             # bg_factory=bg_factory,
-            db=create_async_engine(
-                url=config.database.build_connection_str(),
-                echo=config.debug,
-            ),
+            db_engine=db_engine,
         )
 
     except Exception as e:
         logger.exception(e)
+
+    finally:
+        logger.info("Shutting down database engine")
+        await db_engine.dispose()
+
+        logger.info("Closing redis connection")
+        await storage.close()
+
+        logger.info("Shutting down bot")
+        await bot.session.close()
 
 
 if __name__ == "__main__":

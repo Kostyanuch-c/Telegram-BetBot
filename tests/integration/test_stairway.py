@@ -1,14 +1,8 @@
 """Stairway tests for alembic migrations."""
 import pytest
-from alembic.command import (
-    downgrade,
-    upgrade,
-)
+from alembic.command import downgrade, upgrade
 from alembic.config import Config
-from alembic.script import (
-    Script,
-    ScriptDirectory,
-)
+from alembic.script import Script, ScriptDirectory
 from tests.utils.alembic import alembic_config_from_url
 
 

@@ -1,13 +1,7 @@
 """Base model."""
-from sqlalchemy import (
-    Integer,
-    MetaData,
-)
+from sqlalchemy import Integer, MetaData
 from sqlalchemy.ext.declarative import as_declarative
-from sqlalchemy.orm import (
-    Mapped,
-    mapped_column,
-)
+from sqlalchemy.orm import Mapped, mapped_column
 
 
 metadata = MetaData(

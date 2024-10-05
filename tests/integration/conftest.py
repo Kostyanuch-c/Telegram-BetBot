@@ -3,10 +3,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 
 import pytest
 import pytest_asyncio
-from sqlalchemy.ext.asyncio import (
-    AsyncEngine,
-    AsyncSession,
-)
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 from src.bot.dispatcher import get_dispatcher
 from tests.utils.mocked_bot import MockedBot
 from tests.utils.mocked_database import MockedDatabase

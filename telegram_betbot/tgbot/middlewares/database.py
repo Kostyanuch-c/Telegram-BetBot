@@ -1,33 +1,27 @@
-# import logging
-#
-# from typing import Awaitable, Callable
-#
-# from aiogram import BaseMiddleware
-# from aiogram.types import Update
-# from psycopg import Error
-# from psycopg_pool import AsyncConnectionPool
-#
-# from app.infrastructure.database.database.db import DB
-#
-# logger = logging.getLogger(__name__)
-#
-#
-# class DataBaseMiddleware(BaseMiddleware):
-#     async def __call__(
-#         self,
-#         handler: Callable[[Update, dict[str, any]], Awaitable[None]],
-#         event: Update,
-#         data: dict[str, any]
-#     ) -> any:
-#         db_pool: AsyncConnectionPool = data.get('_db_pool')
-#
-#         async with db_pool.connection() as connection:
-#             async with connection.transaction():
-#                 try:
-#                     data['db'] = DB(connection)
-#                     result = await handler(event, data)
-#                 except Error as e:
-#                     logger.exception('Transaction rolled back due to error: %s', e)
-#                     result = await handler(event, data)
-#
-#         return result
+import logging
+from collections.abc import Awaitable, Callable
+
+from aiogram import BaseMiddleware
+from aiogram.types import CallbackQuery, Message
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from telegram_betbot.database import Database
+
+
+logger = logging.getLogger(__name__)
+
+
+class DatabaseMiddleware(BaseMiddleware):
+    """This middleware throw a Database class to handler."""
+
+    async def __call__(
+        self,
+        handler: Callable[[Message, dict[str, any]], Awaitable[None]],
+        event: Message | CallbackQuery,
+        data: dict[str, any],
+    ) -> any:
+        """This method calls every update."""
+        async with AsyncSession(bind=data["db_engine"]) as session:
+            data["db"] = Database(session)
+            return await handler(event, data)

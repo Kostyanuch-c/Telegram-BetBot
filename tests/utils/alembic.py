@@ -2,10 +2,7 @@
 import importlib
 import os
 from argparse import Namespace
-from collections import (
-    defaultdict,
-    namedtuple,
-)
+from collections import defaultdict, namedtuple
 from pathlib import Path
 from types import SimpleNamespace
 
