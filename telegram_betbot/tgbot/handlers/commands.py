@@ -31,4 +31,4 @@ async def process_start_command(
 
     await UserService(db).register_user(user_data)
 
-    await dialog_manager.start(state=StartSG.choice_bm, mode=StartMode.RESET_STACK)
+    await dialog_manager.start(state=StartSG.start, mode=StartMode.RESET_STACK)

@@ -7,9 +7,9 @@ class UserService:
         self.db = db
 
     async def register_user(self, telegram_user_data: dict) -> None:
-        async with self.db.session.begin():
+        async with self.db.user.session.begin():
             user: User = await self.db.user.get_by_where(
-                User.telegram_id == telegram_user_data['telegram_id'],
+                User.telegram_id == telegram_user_data["telegram_id"],
             )
 
             if user is None:

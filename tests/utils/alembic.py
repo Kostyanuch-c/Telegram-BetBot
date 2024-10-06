@@ -8,9 +8,13 @@ from types import SimpleNamespace
 
 from alembic.config import Config
 
+from telegram_betbot.config_data.config import Config as TelegramBotConfig, load_config
+
+
+MyConfig: TelegramBotConfig = load_config()
 
 PROJECT_PATH = Path(__file__).parent.parent.parent.resolve()
-DEFAULT_PG_URL = conf.db.build_connection_str()
+DEFAULT_PG_URL = MyConfig.database.build_connection_str()
 
 
 def make_alembic_config(

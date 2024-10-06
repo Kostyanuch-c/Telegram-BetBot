@@ -3,10 +3,13 @@
 from sqlalchemy import (
     BigInteger,
     Enum,
-    Float,
     Text,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import (
+    Mapped,
+    mapped_column,
+    relationship,
+)
 
 from telegram_betbot.tgbot.enums.role import Role
 
@@ -54,11 +57,6 @@ class User(Base):
     role: Mapped[Role] = mapped_column(Enum(Role), default=Role.USER)
     """ User's role """
 
-    # status: Mapped[Status] = mapped_column(Enum(Role), default=Status....
-    # """ User's status """
-
-    time_difference_moscow: Mapped[float] = mapped_column(
-        Float,
-        nullable=False,
+    referrals: Mapped[list["Referral"]] = relationship(  # noqa:F821
+        "Referral", back_populates="user",
     )
-    """User's time difference moscow '"""

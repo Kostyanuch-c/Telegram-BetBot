@@ -1,8 +1,6 @@
 """User repository file."""
 
-from datetime import datetime
 
-import pytz
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,14 +9,14 @@ from telegram_betbot.database.repositories.abstract import Repository
 from telegram_betbot.tgbot.enums.role import Role
 
 
-def calculate_time_difference(telegram_date: int) -> float:
-    """Calculate time difference between user and Moscow."""
-
-    moscow_timezone = pytz.timezone('Europe/Moscow')
-    moscow_time = datetime.now(moscow_timezone)
-
-    time_diff = (moscow_time - telegram_date).total_seconds() / 3600
-    return time_diff
+# def calculate_time_difference(telegram_date: int) -> float:
+#     """Calculate time difference between user and Moscow."""
+#
+#     moscow_timezone = pytz.timezone('Europe/Moscow')
+#     moscow_time = datetime.now(moscow_timezone)
+#
+#     time_diff = (moscow_time - telegram_date).total_seconds() / 3600
+#     return time_diff
 
 
 class UserRepo(Repository[User]):
@@ -29,18 +27,17 @@ class UserRepo(Repository[User]):
         super().__init__(type_model=User, session=session)
 
     async def new(
-            self,
-            telegram_id: int,
-            telegram_date: int,
-            user_name: str | None = None,
-            first_name: str | None = None,
-            last_name: str | None = None,
-            language_code: str | None = None,
-            is_premium: bool | None = False,
-            role: Role = Role.USER,
-
+        self,
+        telegram_id: int,
+        telegram_date: int,
+        user_name: str | None = None,
+        first_name: str | None = None,
+        last_name: str | None = None,
+        language_code: str | None = None,
+        is_premium: bool | None = False,
+        role: Role = Role.USER,
     ) -> None:
-        time_difference_moscow = calculate_time_difference(telegram_date)
+        # time_difference_moscow = calculate_time_difference(telegram_date)
 
         await self.session.merge(
             User(
@@ -50,7 +47,7 @@ class UserRepo(Repository[User]):
                 last_name=last_name,
                 language_code=language_code,
                 role=role,
-                time_difference_moscow=time_difference_moscow,
+                # time_difference_moscow=time_difference_moscow,
             ),
         )
 

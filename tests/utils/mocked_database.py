@@ -1,6 +1,8 @@
 """Mocked Database."""
 from sqlalchemy import MetaData
-from src.db import Base, Database
+
+from telegram_betbot.database import Database
+from telegram_betbot.database.models import Base
 
 
 class MockedDatabase(Database):

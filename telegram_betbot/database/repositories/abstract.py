@@ -6,10 +6,10 @@ from typing import Generic, TypeVar
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..models import Base
+from telegram_betbot.database.models import Base
 
 
-AbstractModel = TypeVar('AbstractModel')
+AbstractModel = TypeVar("AbstractModel")
 
 
 class Repository(Generic[AbstractModel]):
@@ -45,7 +45,10 @@ class Repository(Generic[AbstractModel]):
         return (await self.session.execute(statement)).one_or_none()
 
     async def get_many(
-            self, whereclause, limit: int = 100, order_by=None,
+        self,
+        whereclause,
+        limit: int = 100,
+        order_by=None,
     ) -> Sequence[Base]:
         """Get many models from the database with whereclause.
 
