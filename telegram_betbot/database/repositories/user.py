@@ -1,6 +1,5 @@
 """User repository file."""
 
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -26,32 +25,26 @@ class UserRepo(Repository[User]):
         """Initialize user repository as for all users or only for one user."""
         super().__init__(type_model=User, session=session)
 
-    async def new(
+    async def create_and_return(
         self,
         telegram_id: int,
-        telegram_date: int,
         user_name: str | None = None,
         first_name: str | None = None,
         last_name: str | None = None,
         language_code: str | None = None,
-        is_premium: bool | None = False,
         role: Role = Role.USER,
-    ) -> None:
-        # time_difference_moscow = calculate_time_difference(telegram_date)
-
-        await self.session.merge(
-            User(
-                telegram_id=telegram_id,
-                user_name=user_name,
-                first_name=first_name,
-                last_name=last_name,
-                language_code=language_code,
-                role=role,
-                # time_difference_moscow=time_difference_moscow,
-            ),
+    ) -> User:
+        user = User(
+            telegram_id=telegram_id,  # type: ignore[call-arg]
+            user_name=user_name,  # type: ignore[call-arg]
+            first_name=first_name,  # type: ignore[call-arg]
+            last_name=last_name,  # type: ignore[call-arg]
+            language_code=language_code,  # type: ignore[call-arg]
+            role=role,  # type: ignore[call-arg]
         )
+        await self.session.merge(user)
 
-        await self.session.commit()
+        return user
 
     async def get_role(self, telegram_id: int) -> Role:
         """Get user role by id."""

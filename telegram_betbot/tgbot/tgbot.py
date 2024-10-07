@@ -8,12 +8,14 @@ from aiogram.fsm.storage.redis import DefaultKeyBuilder, RedisStorage
 from aiogram.fsm.strategy import FSMStrategy
 
 from aiogram_dialog import setup_dialogs
+
 from redis.asyncio.client import Redis
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from telegram_betbot.config_data.config import Config, load_config
 from telegram_betbot.config_data.redis_config import create_redis_connection
 from telegram_betbot.database.database import create_async_engine
+from telegram_betbot.tgbot.dialogs.admin.start.dialogs import admin_start_dialog
 from telegram_betbot.tgbot.dialogs.start.dialogs import start_dialog
 from telegram_betbot.tgbot.handlers.commands import commands_router
 from telegram_betbot.tgbot.keyboards.menu_button import set_main_menu_button
@@ -49,7 +51,10 @@ async def main(config: Config):
     await set_main_menu_button(bot)
 
     logger.info("Including routers")
-    dp.include_routers(commands_router, start_dialog)
+    dp.include_routers(commands_router)
+    dp.include_routers(admin_start_dialog)
+
+    dp.include_routers(start_dialog)
 
     logger.info("Including middlewares")
     dp.update.middleware(DatabaseMiddleware())

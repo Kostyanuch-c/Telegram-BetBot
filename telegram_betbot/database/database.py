@@ -30,10 +30,9 @@ class Database:
     session: AsyncSession
 
     def __init__(
-            self,
-            session: AsyncSession,
-            user: UserRepo = None,
-
+        self,
+        session: AsyncSession,
+        user: UserRepo = None,
     ):
         """Initialize Database class.
 

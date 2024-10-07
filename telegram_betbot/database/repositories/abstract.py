@@ -1,5 +1,4 @@
 """Repository file."""
-import abc
 from collections.abc import Sequence
 from typing import Generic, TypeVar
 
@@ -35,14 +34,17 @@ class Repository(Generic[AbstractModel]):
         """
         return await self.session.get(entity=self.type_model, ident=ident)
 
-    async def get_by_where(self, whereclause) -> AbstractModel | None:
+    async def get_by_where(self, whereclause, options: list | None = None) -> AbstractModel | None:
         """Get an ONE model from the database with whereclause.
 
         :param whereclause: Clause by which entry will be found
+        :param options: Which options will be used for operations
         :return: Model if only one model was found, else None.
         """
         statement = select(self.type_model).where(whereclause)
-        return (await self.session.execute(statement)).one_or_none()
+        if options:
+            statement = statement.options(*options)
+        return (await self.session.execute(statement)).scalars().one_or_none()
 
     async def get_many(
         self,
@@ -75,11 +77,3 @@ class Repository(Generic[AbstractModel]):
         """
         statement = delete(self.type_model).where(whereclause)
         await self.session.execute(statement)
-
-    @abc.abstractmethod
-    async def new(self, *args, **kwargs) -> None:
-        """Add new entry of model to the database.
-
-        :return: Nothing.
-        """
-        ...

@@ -5,7 +5,9 @@ from aiogram.types import Message, User
 from aiogram_dialog import DialogManager, StartMode
 
 from telegram_betbot.database import Database
+from telegram_betbot.tgbot.enums.role import Role
 from telegram_betbot.tgbot.services.user_service import UserService
+from telegram_betbot.tgbot.states.admin import AdminSG
 from telegram_betbot.tgbot.states.start import StartSG
 
 
@@ -18,17 +20,21 @@ async def process_start_command(
     dialog_manager: DialogManager,
     db: Database,
 ) -> None:
-    user: User = message.from_user
+    telegram_user: User = message.from_user
 
     user_data = {
-        "telegram_id": user.id,
-        "first_name": user.first_name,
-        "last_name": user.last_name,
-        "language_code": user.language_code,
-        "telegram_date": message.date,
-        "user_name": user.username,
+        "telegram_id": telegram_user.id,
+        "first_name": telegram_user.first_name,
+        "last_name": telegram_user.last_name,
+        "language_code": telegram_user.language_code,
+        "user_name": telegram_user.username,
     }
 
-    await UserService(db).register_user(user_data)
+    user_service = UserService(db)
 
-    await dialog_manager.start(state=StartSG.start, mode=StartMode.RESET_STACK)
+    user_role: Role = await user_service.get_role_or_create_user(user_data)
+
+    if user_role == Role.ADMINISTRATOR:
+        await dialog_manager.start(state=AdminSG.start, mode=StartMode.RESET_STACK)
+    else:
+        await dialog_manager.start(state=StartSG.start, mode=StartMode.RESET_STACK)

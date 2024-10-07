@@ -51,14 +51,14 @@ skip_glob = [
     ".env",
 ]
 known_aiogram = ["aiogram", ]
-known_aiogram_dialog = ["aiogram-dialog", ]
+known_aiogram_dialog = ["aiogram_dialog", ]
 known_first_party = ["telegram_betbot"]
 
 sections = [
     "FUTURE",
     "STDLIB",
     "AIOGRAM",
-    "AIOGRAM-DIALOG",
+    "AIOGRAM_DIALOG",
     "THIRDPARTY",
     "FIRSTPARTY",
     "LOCALFOLDER",

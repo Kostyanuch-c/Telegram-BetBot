@@ -22,4 +22,9 @@ class Streamer(Base):
     referrals: Mapped[list["Referral"]] = relationship(  # noqa:F821
         "Referral",
         back_populates="streamer",
-    )  # noqa
+    )
+
+    referral_links: Mapped[list["StreamerReferralLink"]] = relationship(  # noqa:F821
+        "StreamerReferralLink",
+        back_populates="streamer",
+    )
