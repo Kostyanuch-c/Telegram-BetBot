@@ -8,16 +8,6 @@ from telegram_betbot.database.repositories.abstract import Repository
 from telegram_betbot.tgbot.enums.role import Role
 
 
-# def calculate_time_difference(telegram_date: int) -> float:
-#     """Calculate time difference between user and Moscow."""
-#
-#     moscow_timezone = pytz.timezone('Europe/Moscow')
-#     moscow_time = datetime.now(moscow_timezone)
-#
-#     time_diff = (moscow_time - telegram_date).total_seconds() / 3600
-#     return time_diff
-
-
 class UserRepo(Repository[User]):
     """User repository for CRUD and other SQL queries."""
 

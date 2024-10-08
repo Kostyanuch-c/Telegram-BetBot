@@ -7,6 +7,8 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine as _create_async_engine,
 )
 
+from telegram_betbot.database.repositories import ReferralRepo
+from telegram_betbot.database.repositories.streamers_and_bookmakers import StreamerBookmakerRepo
 from telegram_betbot.database.repositories.user import UserRepo
 
 
@@ -26,13 +28,18 @@ def create_async_engine(url: URL | str, echo: bool = False) -> AsyncEngine:
 class Database:
     user: UserRepo
     """ User repository """
-
+    referral: ReferralRepo
+    """ Referral repository """
+    streamers_and_bookmakers: StreamerBookmakerRepo
+    """ Streamer referral link repository """
     session: AsyncSession
 
     def __init__(
         self,
         session: AsyncSession,
         user: UserRepo = None,
+        referral: ReferralRepo = None,
+        streamers_and_bookmakers: StreamerBookmakerRepo = None,
     ):
         """Initialize Database class.
 
@@ -41,3 +48,7 @@ class Database:
         """
         self.session = session
         self.user = user or UserRepo(session=session)
+        self.referral = referral or ReferralRepo(session=session)
+        self.streamers_and_bookmakers = streamers_and_bookmakers or StreamerBookmakerRepo(
+            session=session,
+        )

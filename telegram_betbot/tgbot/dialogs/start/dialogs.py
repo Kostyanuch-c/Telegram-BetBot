@@ -1,4 +1,7 @@
+from aiogram.enums import ContentType
+
 from aiogram_dialog import Dialog, Window
+from aiogram_dialog.widgets.input import MessageInput, TextInput
 from aiogram_dialog.widgets.kbd import (
     Back,
     Button,
@@ -11,9 +14,13 @@ from aiogram_dialog.widgets.text import Const, Format
 from telegram_betbot.tgbot.dialogs.start.getters import get_registration_link, get_start_message
 from telegram_betbot.tgbot.dialogs.start.handlers import (
     back_button_in_process_check_referal_id,
+    check_input_type,
+    correct_input_handler,
+    error_input_id_handler,
     process_choice_bet_company,
     process_choice_streamer,
     process_is_referal_choice,
+    wrong_type_input,
 )
 from telegram_betbot.tgbot.lexicon.lexicon import LEXICON_RU
 from telegram_betbot.tgbot.states.start import StartSG
@@ -40,8 +47,8 @@ start_dialog = Dialog(
     Window(
         Format(LEXICON_RU["choice_bm"]),
         Row(
-            Button(text=Const("PARI BET"), id="pari_bet", on_click=process_choice_bet_company),
-            Button(text=Const("Olimp Bet"), id="olimp_bet", on_click=process_choice_bet_company),
+            Button(text=Const("PARI BET"), id="Pari", on_click=process_choice_bet_company),
+            Button(text=Const("Olimp Bet"), id="Olimp", on_click=process_choice_bet_company),
         ),
         Back(Const("◀️"), id="back"),
         getter=get_start_message,
@@ -73,6 +80,16 @@ start_dialog = Dialog(
     ),
     Window(
         Format("Отправь id для проверки"),
+        TextInput(
+            id="input_link_or_id",
+            type_factory=check_input_type,
+            on_success=correct_input_handler,
+            on_error=error_input_id_handler,
+        ),
+        MessageInput(
+            func=wrong_type_input,
+            content_types=ContentType.ANY,
+        ),
         Button(
             Const("◀️"),
             id="back_button_in_process_check_referal_id",

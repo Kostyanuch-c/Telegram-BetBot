@@ -6,3 +6,4 @@ class AdminSG(StatesGroup):
     choice_bm = State()
     choice_streamer = State()
     main_change = State()
+    end_step = State()

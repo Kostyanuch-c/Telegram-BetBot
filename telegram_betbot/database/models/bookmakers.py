@@ -24,7 +24,7 @@ class Bookmaker(Base):
         back_populates="bookmaker",
     )
 
-    referral_links: Mapped[list["StreamerReferralLink"]] = relationship(  # noqa:F821
-        "StreamerReferralLink",
+    referral_links: Mapped[list["StreamerBookmakerMembership"]] = relationship(  # noqa:F821
+        "StreamerBookmakerMembership",
         back_populates="bookmaker",
     )

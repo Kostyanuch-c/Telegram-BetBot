@@ -44,6 +44,8 @@ class Repository(Generic[AbstractModel]):
         statement = select(self.type_model).where(whereclause)
         if options:
             statement = statement.options(*options)
+
+        print(str(statement))
         return (await self.session.execute(statement)).scalars().one_or_none()
 
     async def get_many(

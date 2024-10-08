@@ -1,4 +1,3 @@
-# from dataclasses import dataclass
 """User model file."""
 from sqlalchemy import (
     BigInteger,
@@ -58,5 +57,6 @@ class User(Base):
     """ User's role """
 
     referrals: Mapped[list["Referral"]] = relationship(  # noqa:F821
-        "Referral", back_populates="user",
+        "Referral",
+        back_populates="user",
     )

@@ -22,7 +22,7 @@ async def process_start_command(
 ) -> None:
     telegram_user: User = message.from_user
 
-    user_data = {
+    user_data: dict[str, any] = {
         "telegram_id": telegram_user.id,
         "first_name": telegram_user.first_name,
         "last_name": telegram_user.last_name,
@@ -30,7 +30,7 @@ async def process_start_command(
         "user_name": telegram_user.username,
     }
 
-    user_service = UserService(db)
+    user_service: UserService = UserService(db)
 
     user_role: Role = await user_service.get_role_or_create_user(user_data)
 

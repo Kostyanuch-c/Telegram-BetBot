@@ -19,13 +19,19 @@ BOOKMAKER_LINKS: dict[str, str] = {
 }
 
 LEXICON_ADMIN: dict[str, str] = {
+    "back": "Назад",
+    "in_start": "Вернуться в начало",
     "start_admin": "Здравстуйте хозяин {username}",
-    "add_referral_keys": "Добавить id новых рефералов",
-    "change_streamer_link": "Изменить/добавить реферальную ссылку",
+    "add_referral_keys": "Добавить рефералов",
+    "change_streamer_link": "Изменить ссылку",
     "choice_bm": "Выбери букмекера",
     "choice_streamer": "Выбери стримера",
     "add_referral_info": "<b>Введите новые реферральные id для {streamer} в {bookmaker} </b>",
     "change_link_info": "<b>Введите новую реферальную ссылку для {streamer} в {bookmaker} </b>",
+    "success_add_referral": "Добавление реферальных id  стримеру {streamer} "
+                            "в {bookmaker} прошло успешно!",
+    "success_add_link": "Изменение реферальной ссылки для стримера {streamer} "
+                        "в {bookmaker} прошло успешно",
 }
 
 LEXICON_RU: dict[str, str] = {
@@ -34,7 +40,7 @@ LEXICON_RU: dict[str, str] = {
     "yes_referal": "Я уже реферал",
     "no_make_referal": "Стать рефералом",
     "choice_bm": "Рефералом можно быть только"
-    " у одного букмерра для одного стримера \n  Выбери букмера",
+                 " у одного букмерра для одного стримера \n  Выбери букмера",
     "choice_streamer": "Теперь выберети стримера",
     "to_link": "Перейдите по ссылки и зарегистрируйся",
 }

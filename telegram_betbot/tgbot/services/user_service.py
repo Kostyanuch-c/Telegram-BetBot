@@ -7,7 +7,7 @@ class UserService:
         self.db = db
 
     async def get_role_or_create_user(self, telegram_user_data: dict) -> User:
-        async with self.db.session.begin():
+        async with self.db.user.session.begin():
             user: User = await self.db.user.get_by_where(
                 User.telegram_id == telegram_user_data["telegram_id"],
             )

@@ -1,8 +1,15 @@
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, Message
 
 from aiogram_dialog import DialogManager
+from aiogram_dialog.widgets.input import ManagedTextInput, MessageInput
 from aiogram_dialog.widgets.kbd import Button
 
+from telegram_betbot.tgbot.exeptions.referral import (
+    ReferralAlreadyRegisteredByYouError,
+    ReferralAlreadyRegisteredError,
+    ReferralInvalidError,
+)
+from telegram_betbot.tgbot.services.referral_service import ReferralService
 from telegram_betbot.tgbot.states.start import StartSG
 
 
@@ -49,3 +56,55 @@ async def back_button_in_process_check_referal_id(
         await dialog_manager.switch_to(state=StartSG.choice_streamer)
     else:
         await dialog_manager.back()
+
+
+def check_input_type(text: any) -> str:
+    if isinstance(text, str) and len(text.strip()) > 1:
+        return text
+    raise ValueError
+
+
+async def error_input_id_handler(
+    message: Message,
+    widget: ManagedTextInput,
+    dialog_manager: DialogManager,
+    error: ValueError,
+):
+    await message.answer(
+        text="Вы ввели некорректные данные. Сообщение должно быть строкой, больше одного символа!",
+    )
+
+
+async def wrong_type_input(message: Message, widget: MessageInput, dialog_manager: DialogManager):
+    await message.answer(text="Введите, пожалуйста, текстовое сообщение.")
+
+
+async def correct_input_handler(
+    message: Message,
+    widget: ManagedTextInput,
+    dialog_manager: DialogManager,
+    referral_key: str,
+) -> None:
+    db = dialog_manager.middleware_data["db"]
+    bookmaker = dialog_manager.dialog_data["bet_company"]
+    streamer = dialog_manager.dialog_data["streamer"]
+    telegram_id = message.from_user.id
+
+    try:
+        await ReferralService(db).check_and_create_referral(
+            referral_key=referral_key,
+            telegram_id=telegram_id,
+            bookmaker_name=bookmaker,
+            streamer_name=streamer,
+        )
+
+        await message.answer("Теперь ты подтверждён и зарегистрирован по реферальному ключу!")
+
+    except ReferralAlreadyRegisteredError as exception:
+        await message.answer(exception.message)
+
+    except ReferralAlreadyRegisteredByYouError as exception:
+        await message.answer(exception.message)
+
+    except ReferralInvalidError as exception:
+        await message.answer(exception.message)

@@ -12,10 +12,10 @@ from sqlalchemy.orm import (
 from .base import Base
 
 
-class StreamerReferralLink(Base):
-    """StreamerReferralLink model."""
+class StreamerBookmakerMembership(Base):
+    """StreamerBookmakerMembership model."""
 
-    __tablename__ = "streamer_referral_links"
+    __tablename__ = "streamer_bookmaker_membership"
 
     streamer_id: Mapped[int] = mapped_column(
         ForeignKey("streamers.id"),
