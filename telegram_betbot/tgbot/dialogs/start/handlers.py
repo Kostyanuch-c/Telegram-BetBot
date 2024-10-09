@@ -29,8 +29,20 @@ async def process_choice_bet_company(
     dialog_manager: DialogManager,
 ):
     user_choice = button.widget_id
-    dialog_manager.dialog_data["bet_company"] = user_choice
-    await dialog_manager.next()
+
+    db = dialog_manager.middleware_data["db"]
+    telegram_id = callback.from_user.id
+
+    _, free_bookmakers = await ReferralService(db).check_free_bookmakers(
+        telegram_id=telegram_id,
+    )
+
+    if user_choice in free_bookmakers:
+        dialog_manager.dialog_data["bet_company"] = user_choice
+
+        await dialog_manager.next()
+    else:
+        await callback.answer(text="Вы являетесь рефераллом у этого букмеркера")
 
 
 async def process_choice_streamer(
@@ -89,7 +101,6 @@ async def correct_input_handler(
     bookmaker = dialog_manager.dialog_data["bet_company"]
     streamer = dialog_manager.dialog_data["streamer"]
     telegram_id = message.from_user.id
-
     try:
         await ReferralService(db).check_and_create_referral(
             referral_key=referral_key,
@@ -97,14 +108,35 @@ async def correct_input_handler(
             bookmaker_name=bookmaker,
             streamer_name=streamer,
         )
+        free_bookmakers = dialog_manager.dialog_data["free_bookmakers"]
+        occupied_bookmakers = dialog_manager.dialog_data["occupied_bookmakers"]
+        if bookmaker in free_bookmakers:
+            free_bookmakers.remove(bookmaker)
+
+        occupied_bookmakers[bookmaker] = streamer
+
+        dialog_manager.dialog_data.update(
+            {
+                "free_bookmakers": free_bookmakers,
+                "occupied_bookmakers": occupied_bookmakers,
+            },
+        )
 
         await message.answer("Теперь ты подтверждён и зарегистрирован по реферальному ключу!")
-
-    except ReferralAlreadyRegisteredError as exception:
+        await dialog_manager.next()
+    except ReferralInvalidError as exception:
         await message.answer(exception.message)
 
     except ReferralAlreadyRegisteredByYouError as exception:
         await message.answer(exception.message)
 
-    except ReferralInvalidError as exception:
+    except ReferralAlreadyRegisteredError as exception:
         await message.answer(exception.message)
+
+
+async def to_start_button_process_end_check_referal_id(
+    callback: CallbackQuery,
+    button: Button,
+    dialog_manager: DialogManager,
+):
+    await dialog_manager.switch_to(state=StartSG.start)

@@ -6,4 +6,4 @@ from telegram_betbot.database.models.streamers import Streamer
 from telegram_betbot.database.models.users import User
 
 
-__all__ = ("Base", "User", "Streamer", "Bookmaker", "Referral", "StreamerBookmakerMembership")
+__all__ = ("Base", "StreamerBookmakerMembership", "Streamer", "Bookmaker", "Referral", "User")

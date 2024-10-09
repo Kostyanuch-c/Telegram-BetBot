@@ -10,7 +10,10 @@ from aiogram_dialog.widgets.kbd import (
 )
 from aiogram_dialog.widgets.text import Const, Format
 
-from telegram_betbot.tgbot.dialogs.admin.start.getters import get_choice_data
+from telegram_betbot.tgbot.dialogs.admin.start.getters import (
+    admin_get_start_message,
+    get_choice_data,
+)
 from telegram_betbot.tgbot.dialogs.admin.start.handlers import (
     admin_check_input_type,
     admin_choice_add_referal_or_work_with_link,
@@ -41,7 +44,7 @@ admin_start_dialog = Dialog(
                 on_click=admin_choice_add_referal_or_work_with_link,
             ),
         ),
-        getter=get_start_message,
+        getter=admin_get_start_message,
         state=AdminSG.start,
     ),
     Window(

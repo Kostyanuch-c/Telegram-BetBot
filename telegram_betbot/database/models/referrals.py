@@ -1,4 +1,5 @@
 from sqlalchemy import (
+    BigInteger,
     ForeignKey,
     String,
     UniqueConstraint,
@@ -19,6 +20,11 @@ class Referral(Base):
 
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id"),
+        nullable=True,
+        default=None,
+    )
+    telegram_id: Mapped[int] = mapped_column(
+        BigInteger,
         nullable=True,
         default=None,
     )

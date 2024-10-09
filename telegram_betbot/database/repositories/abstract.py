@@ -45,7 +45,6 @@ class Repository(Generic[AbstractModel]):
         if options:
             statement = statement.options(*options)
 
-        print(str(statement))
         return (await self.session.execute(statement)).scalars().one_or_none()
 
     async def get_many(
@@ -53,21 +52,14 @@ class Repository(Generic[AbstractModel]):
         whereclause,
         limit: int = 100,
         order_by=None,
+        options: list | None = None,
     ) -> Sequence[Base]:
-        """Get many models from the database with whereclause.
-
-        :param whereclause: Where clause for finding models
-        :param limit: (Optional) Limit count of results
-        :param order_by: (Optional) Order by clause.
-
-        Example:
-        >> Repository.get_many(Model.id == 1, limit=10, order_by=Model.id)
-
-        :return: List of founded models
-        """
+        """Get many models from the database with whereclause."""
         statement = select(self.type_model).where(whereclause).limit(limit)
         if order_by:
             statement = statement.order_by(order_by)
+        if options:
+            statement = statement.options(*options)
 
         return (await self.session.scalars(statement)).all()
 

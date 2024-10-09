@@ -18,7 +18,6 @@ setup-pre-commit-hooks:
 
 install: install-dependencies setup-pre-commit-hooks
 
-
 # Alembic utils
 .PHONY: generate
 generate:
@@ -27,3 +26,25 @@ generate:
 .PHONY: migrate
 migrate:
 	poetry run alembic upgrade head
+
+# Docker utils
+.PHONY: project-start
+project-start:
+	docker compose up --force-recreate ${MODE}
+
+.PHONY: project-stop
+project-stop:
+	docker compose down --remove-orphans ${MODE}
+
+.PHONY: build
+build:
+	docker compose up --build --force-recreate
+
+.PHONY: init_dump
+init_dump:
+	docker compose exec db pg_restore -U $(DB_USER) -d $(DB_NAME) /app/init_dump.sql --verbose
+
+.PHONY: rebuild-clean
+rebuild-clean:
+	docker compose down -v --remove-orphans
+	docker compose up --build --force-recreate
