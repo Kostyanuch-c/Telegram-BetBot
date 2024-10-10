@@ -11,6 +11,8 @@ from aiogram_dialog.widgets.kbd import (
 )
 from aiogram_dialog.widgets.text import Const, Format
 
+from magic_filter import F
+
 from telegram_betbot.tgbot.dialogs.start.getters import (
     get_bookmaker_name,
     get_registration_link,
@@ -25,17 +27,12 @@ from telegram_betbot.tgbot.dialogs.start.handlers import (
     process_choice_bet_company,
     process_choice_streamer,
     process_is_referal_choice,
-    to_start_button_process_end_check_referal_id,
+    to_start_after_check,
     wrong_type_input,
 )
 from telegram_betbot.tgbot.filters.user import (
-    free_only_pari,
-    free_only_upx,
-    is_all_bm_free,
     is_choice_button_for_new_user,
     is_choice_button_for_referrals,
-    is_not_free_bm,
-    is_one_or_more_free_bm,
 )
 from telegram_betbot.tgbot.lexicon.lexicon import LEXICON_RU
 from telegram_betbot.tgbot.states.start import StartSG
@@ -43,10 +40,10 @@ from telegram_betbot.tgbot.states.start import StartSG
 
 start_dialog = Dialog(
     Window(
-        Format(LEXICON_RU["start"], when=is_all_bm_free),
-        Format(LEXICON_RU["start_pari"], when=free_only_pari),
-        Format(LEXICON_RU["start_upx"], when=free_only_upx),
-        Format(LEXICON_RU["start_with_all_bm"], when=is_not_free_bm),
+        Format(LEXICON_RU["start"], when=F['all_free']),
+        Format(LEXICON_RU["start_pari"], when=F['only_pari']),
+        Format(LEXICON_RU["start_upx"], when=F['only_upx']),
+        Format(LEXICON_RU["start_with_all_bm"], when=F['all_bm']),
         Row(
             Button(
                 text=Const(LEXICON_RU["yes_referal"]),
@@ -58,19 +55,19 @@ start_dialog = Dialog(
                 id="no_make_referal",
                 on_click=process_is_referal_choice,
             ),
-            when=is_one_or_more_free_bm,
+            when=F['one_or_more_free'],
         ),
         Url(
             text=Format(LEXICON_RU["start_pari_button"]),
             id="pari",
             url=Format("{pari_link}"),
-            when=free_only_pari,
+            when=F['only_pary'],
         ),
         Url(
             text=Format(LEXICON_RU["start_upx_button"]),
             id="upx",
             url=Format("{upx_link}"),
-            when=free_only_upx,
+            when=F['only_upx'],
         ),
         Row(
             Url(
@@ -83,7 +80,7 @@ start_dialog = Dialog(
                 id="upx",
                 url=Format("{upx_link}"),
             ),
-            when=is_not_free_bm,
+            when=F['all_bm'],
         ),
         getter=get_start_message,
         state=StartSG.start,
@@ -125,7 +122,8 @@ start_dialog = Dialog(
         state=StartSG.send_link,
     ),
     Window(
-        Format(LEXICON_RU["request_id"]),
+        Format(LEXICON_RU["request_id"], when=~F['dialog_data']['wrong_id']),
+        Format(LEXICON_RU["question_correct"], when=F["dialog_data"]['wrong_id']),
         TextInput(
             id="input_link_or_id",
             type_factory=check_input_type,
@@ -136,13 +134,28 @@ start_dialog = Dialog(
             func=wrong_type_input,
             content_types=ContentType.ANY,
         ),
+        Next(
+            Const("Да я уверен"),
+            id="user_is_confident",
+            when=F["dialog_data"]['wrong_id'],
+        ),
         Button(
             Const("◀️"),
             id="back_button_in_process_check_referal_id",
             on_click=back_button_in_process_check_referal_id,
         ),
+
         getter=get_bookmaker_name,
         state=StartSG.check_referal_id,
+    ),
+    Window(
+        Format(LEXICON_RU['waiting_for_confirmation']),
+        Button(
+            Const("Вернуться в начало"),
+            id="in_start",
+            on_click=to_start_after_check,
+        ),
+        state=StartSG.wrong_check,
     ),
     Window(
         Format(LEXICON_RU["confirmation_success"]),
@@ -154,9 +167,9 @@ start_dialog = Dialog(
         Button(
             Const("Вернуться в начало"),
             id="in_start",
-            on_click=to_start_button_process_end_check_referal_id,
+            on_click=to_start_after_check,
         ),
         getter=get_streamer_chanel_link,
-        state=StartSG.end_check,
+        state=StartSG.good_check,
     ),
 )

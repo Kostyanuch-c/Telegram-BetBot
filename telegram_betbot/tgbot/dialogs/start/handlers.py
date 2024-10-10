@@ -16,9 +16,9 @@ from telegram_betbot.tgbot.states.start import StartSG
 
 
 async def process_is_referal_choice(
-    callback: CallbackQuery,
-    button: Button,
-    dialog_manager: DialogManager,
+        callback: CallbackQuery,
+        button: Button,
+        dialog_manager: DialogManager,
 ):
     user_choice = button.widget_id
     dialog_manager.dialog_data["is_referal"] = True if user_choice == "yes_referal" else False
@@ -26,9 +26,9 @@ async def process_is_referal_choice(
 
 
 async def process_choice_bet_company(
-    callback: CallbackQuery,
-    button: Button,
-    dialog_manager: DialogManager,
+        callback: CallbackQuery,
+        button: Button,
+        dialog_manager: DialogManager,
 ):
     user_choice = button.widget_id
     pprint(dialog_manager.dialog_data)
@@ -48,9 +48,9 @@ async def process_choice_bet_company(
 
 
 async def process_choice_streamer(
-    callback: CallbackQuery,
-    button: Button,
-    dialog_manager: DialogManager,
+        callback: CallbackQuery,
+        button: Button,
+        dialog_manager: DialogManager,
 ):
     user_choice = button.widget_id
     dialog_manager.dialog_data["streamer"] = user_choice
@@ -62,9 +62,9 @@ async def process_choice_streamer(
 
 
 async def back_button_in_process_check_referal_id(
-    callback: CallbackQuery,
-    button: Button,
-    dialog_manager: DialogManager,
+        callback: CallbackQuery,
+        button: Button,
+        dialog_manager: DialogManager,
 ):
     if dialog_manager.dialog_data["is_referal"]:
         await dialog_manager.switch_to(state=StartSG.choice_streamer)
@@ -79,10 +79,10 @@ def check_input_type(text: any) -> str:
 
 
 async def error_input_id_handler(
-    message: Message,
-    widget: ManagedTextInput,
-    dialog_manager: DialogManager,
-    error: ValueError,
+        message: Message,
+        widget: ManagedTextInput,
+        dialog_manager: DialogManager,
+        error: ValueError,
 ):
     await message.answer(
         text="Вы ввели некорректные данные. Сообщение должно быть больше одного символа!",
@@ -94,10 +94,10 @@ async def wrong_type_input(message: Message, widget: MessageInput, dialog_manage
 
 
 async def correct_input_handler(
-    message: Message,
-    widget: ManagedTextInput,
-    dialog_manager: DialogManager,
-    referral_key: str,
+        message: Message,
+        widget: ManagedTextInput,
+        dialog_manager: DialogManager,
+        referral_key: str,
 ) -> None:
     db = dialog_manager.middleware_data["db"]
     bookmaker = dialog_manager.dialog_data["bet_company"]
@@ -124,9 +124,9 @@ async def correct_input_handler(
             },
         )
 
-        await message.answer("Теперь ты подтверждён и зарегистрирован по реферальному ключу!")
-        await dialog_manager.next()
+        await dialog_manager.switch_to(state=StartSG.good_check)
     except ReferralInvalidError as exception:
+        dialog_manager.dialog_data["wrong_id"] = True
         await message.answer(exception.message)
 
     except ReferralAlreadyRegisteredByYouError as exception:
@@ -136,9 +136,10 @@ async def correct_input_handler(
         await message.answer(exception.message)
 
 
-async def to_start_button_process_end_check_referal_id(
-    callback: CallbackQuery,
-    button: Button,
-    dialog_manager: DialogManager,
+async def to_start_after_check(
+        callback: CallbackQuery,
+        button: Button,
+        dialog_manager: DialogManager,
 ):
+    dialog_manager.dialog_data["wrong_id"] = False
     await dialog_manager.switch_to(state=StartSG.start)

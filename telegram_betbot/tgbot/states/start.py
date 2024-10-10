@@ -7,4 +7,5 @@ class StartSG(StatesGroup):
     choice_streamer = State()
     send_link = State()
     check_referal_id = State()
-    end_check = State()
+    wrong_check = State()
+    good_check = State()

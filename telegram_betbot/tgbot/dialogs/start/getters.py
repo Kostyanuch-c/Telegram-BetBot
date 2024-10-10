@@ -21,9 +21,9 @@ CHANNELS_LINKS = {
 
 
 async def get_start_message(
-    event_from_user: User,
-    dialog_manager: DialogManager,
-    **kwargs,
+        event_from_user: User,
+        dialog_manager: DialogManager,
+        **kwargs,
 ) -> dict[str, str]:
     username = event_from_user.full_name or event_from_user.username or LEXICON_RU["default_name"]
 
@@ -31,29 +31,36 @@ async def get_start_message(
         dialog_manager.dialog_data.update(dialog_manager.start_data)
 
     occupied_bookmakers = dialog_manager.dialog_data.get("occupied_bookmakers", {})
-    streamer_pari = occupied_bookmakers.get("Pari")
-    streamer_upx = occupied_bookmakers.get("Upx")
+    streamer_pari = occupied_bookmakers.get("Pari", False)
+    streamer_upx = occupied_bookmakers.get("Upx", False)
 
     response_data = {
         "username": username,
+        "all_free": True,
+        "only_pari": False,
+        "only_upx": False,
+        "all_bm": False,
     }
 
     if streamer_pari:
-        response_data.update(
-            {
-                "streamer_pari": streamer_pari,
-                "pari_link": CHANNELS_LINKS["Pari"][streamer_pari],
-            },
-        )
+        response_data.update({
+            "streamer_pari": streamer_pari,
+            "pari_link": CHANNELS_LINKS["Pari"][streamer_pari],
+            "only_pari": True,
+            "all_free": False,
+        })
 
     if streamer_upx:
-        response_data.update(
-            {
-                "streamer_upx": streamer_upx,
-                "upx_link": CHANNELS_LINKS["Upx"][streamer_upx],
-            },
-        )
+        response_data.update({
+            "streamer_upx": streamer_upx,
+            "upx_link": CHANNELS_LINKS["Upx"][streamer_upx],
+            "all_free": False,
+            "only_upx": not streamer_pari,
+            "only_pari": False,
+            "all_bm": bool(streamer_pari),
+        })
 
+    response_data["one_or_more_free"] = not (streamer_pari and streamer_upx)
     return response_data
 
 
