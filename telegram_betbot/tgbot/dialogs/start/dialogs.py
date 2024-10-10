@@ -12,6 +12,7 @@ from aiogram_dialog.widgets.kbd import (
 from aiogram_dialog.widgets.text import Const, Format
 
 from telegram_betbot.tgbot.dialogs.start.getters import (
+    get_bookmaker_name,
     get_registration_link,
     get_start_message,
     get_streamer_chanel_link,
@@ -27,9 +28,12 @@ from telegram_betbot.tgbot.dialogs.start.handlers import (
     to_start_button_process_end_check_referal_id,
     wrong_type_input,
 )
-from telegram_betbot.tgbot.filters.check_free_bm import (
-    free_only_olimp,
+from telegram_betbot.tgbot.filters.user import (
     free_only_pari,
+    free_only_upx,
+    is_all_bm_free,
+    is_choice_button_for_new_user,
+    is_choice_button_for_referrals,
     is_not_free_bm,
     is_one_or_more_free_bm,
 )
@@ -39,10 +43,10 @@ from telegram_betbot.tgbot.states.start import StartSG
 
 start_dialog = Dialog(
     Window(
-        Format(LEXICON_RU["start"], when=is_one_or_more_free_bm),
+        Format(LEXICON_RU["start"], when=is_all_bm_free),
         Format(LEXICON_RU["start_pari"], when=free_only_pari),
-        Format(LEXICON_RU["start_olimp"], when=free_only_olimp),
-        Format(LEXICON_RU["start_all_bm"], when=is_not_free_bm),
+        Format(LEXICON_RU["start_upx"], when=free_only_upx),
+        Format(LEXICON_RU["start_with_all_bm"], when=is_not_free_bm),
         Row(
             Button(
                 text=Const(LEXICON_RU["yes_referal"]),
@@ -63,10 +67,10 @@ start_dialog = Dialog(
             when=free_only_pari,
         ),
         Url(
-            text=Format(LEXICON_RU["start_olimp_button"]),
-            id="olimp",
-            url=Format("{olimp_link}"),
-            when=free_only_olimp,
+            text=Format(LEXICON_RU["start_upx_button"]),
+            id="upx",
+            url=Format("{upx_link}"),
+            when=free_only_upx,
         ),
         Row(
             Url(
@@ -75,9 +79,9 @@ start_dialog = Dialog(
                 url=Format("{pari_link}"),
             ),
             Url(
-                text=Format(LEXICON_RU["start_olimp_button"]),
-                id="olimp",
-                url=Format("{olimp_link}"),
+                text=Format(LEXICON_RU["start_upx_button"]),
+                id="upx",
+                url=Format("{upx_link}"),
             ),
             when=is_not_free_bm,
         ),
@@ -85,17 +89,19 @@ start_dialog = Dialog(
         state=StartSG.start,
     ),
     Window(
-        Format(LEXICON_RU["choice_bm"]),
+        Format(LEXICON_RU["choice_bm"], when=is_choice_button_for_new_user),
+        Format(LEXICON_RU["choose_bookmaker_for_referal"], when=is_choice_button_for_referrals),
         Row(
-            Button(text=Const("PARI BET"), id="Pari", on_click=process_choice_bet_company),
-            Button(text=Const("Olimp Bet"), id="Olimp", on_click=process_choice_bet_company),
+            Button(text=Const("PARI"), id="Pari", on_click=process_choice_bet_company),
+            Button(text=Const("Up-x"), id="Upx", on_click=process_choice_bet_company),
         ),
         Back(Const("◀️"), id="back"),
         getter=get_start_message,
         state=StartSG.choice_bm,
     ),
     Window(
-        Format(LEXICON_RU["choice_streamer"]),
+        Format(LEXICON_RU["choice_streamer"], when=is_choice_button_for_new_user),
+        Format(LEXICON_RU["choose_streamer_for_referal"], when=is_choice_button_for_referrals),
         Row(
             Button(text=Const("streamer_1"), id="streamer_1", on_click=process_choice_streamer),
             Button(text=Const("streamer_2"), id="streamer_2", on_click=process_choice_streamer),
@@ -119,7 +125,7 @@ start_dialog = Dialog(
         state=StartSG.send_link,
     ),
     Window(
-        Format("Отправь id для проверки"),
+        Format(LEXICON_RU["request_id"]),
         TextInput(
             id="input_link_or_id",
             type_factory=check_input_type,
@@ -135,6 +141,7 @@ start_dialog = Dialog(
             id="back_button_in_process_check_referal_id",
             on_click=back_button_in_process_check_referal_id,
         ),
+        getter=get_bookmaker_name,
         state=StartSG.check_referal_id,
     ),
     Window(

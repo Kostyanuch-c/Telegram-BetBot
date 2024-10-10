@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from aiogram.types import CallbackQuery, Message
 
 from aiogram_dialog import DialogManager
@@ -29,7 +31,7 @@ async def process_choice_bet_company(
     dialog_manager: DialogManager,
 ):
     user_choice = button.widget_id
-
+    pprint(dialog_manager.dialog_data)
     db = dialog_manager.middleware_data["db"]
     telegram_id = callback.from_user.id
 
@@ -83,7 +85,7 @@ async def error_input_id_handler(
     error: ValueError,
 ):
     await message.answer(
-        text="Вы ввели некорректные данные. Сообщение должно быть строкой, больше одного символа!",
+        text="Вы ввели некорректные данные. Сообщение должно быть больше одного символа!",
     )
 
 

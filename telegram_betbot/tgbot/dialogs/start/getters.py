@@ -8,14 +8,14 @@ from telegram_betbot.tgbot.services.streamer_bookmaker_service import StreamerBo
 
 CHANNELS_LINKS = {
     "Pari": {
-        "streamer_1": "https://t.me/+ggsGFnTGhK40NGM6",
-        "streamer_2": "https://t.me/+ggsGFnTGhK40NGM6",
-        "streamer_3": "https://t.me/+ggsGFnTGhK40NGM6",
+        "streamer_1": "https://t.me/+eBjbMt7nsjsxZDEy",
+        "streamer_2": "https://t.me/+eBjbMt7nsjsxZDEy",
+        "streamer_3": "https://t.me/+eBjbMt7nsjsxZDEy",
     },
-    "Olimp": {
-        "streamer_1": "https://t.me/+ggsGFnTGhK40NGM6",
-        "streamer_2": "https://t.me/+ggsGFnTGhK40NGM6",
-        "streamer_3": "https://t.me/+ggsGFnTGhK40NGM6",
+    "Upx": {
+        "streamer_1": "https://t.me/+eBjbMt7nsjsxZDEy",
+        "streamer_2": "https://t.me/+eBjbMt7nsjsxZDEy",
+        "streamer_3": "https://t.me/+eBjbMt7nsjsxZDEy",
     },
 }
 
@@ -32,7 +32,7 @@ async def get_start_message(
 
     occupied_bookmakers = dialog_manager.dialog_data.get("occupied_bookmakers", {})
     streamer_pari = occupied_bookmakers.get("Pari")
-    streamer_olimp = occupied_bookmakers.get("Olimp")
+    streamer_upx = occupied_bookmakers.get("Upx")
 
     response_data = {
         "username": username,
@@ -46,11 +46,11 @@ async def get_start_message(
             },
         )
 
-    if streamer_olimp:
+    if streamer_upx:
         response_data.update(
             {
-                "streamer_olimp": streamer_olimp,
-                "olimp_link": CHANNELS_LINKS["Olimp"][streamer_olimp],
+                "streamer_upx": streamer_upx,
+                "upx_link": CHANNELS_LINKS["Upx"][streamer_upx],
             },
         )
 
@@ -78,3 +78,8 @@ async def get_streamer_chanel_link(dialog_manager: DialogManager, **kwargs) -> d
     streamer = dialog_manager.dialog_data.get("streamer")
 
     return {"channel_link": CHANNELS_LINKS[bet_company][streamer]}
+
+
+async def get_bookmaker_name(dialog_manager: DialogManager, **kwargs) -> dict[str, str]:
+    bet_company = dialog_manager.dialog_data.get("bet_company")
+    return {"bookmaker": bet_company}

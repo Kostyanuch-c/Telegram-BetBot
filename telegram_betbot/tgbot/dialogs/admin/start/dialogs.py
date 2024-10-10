@@ -50,8 +50,8 @@ admin_start_dialog = Dialog(
     Window(
         Format(LEXICON_ADMIN["choice_bm"]),
         Row(
-            Button(text=Const("PARI BET"), id="Pari", on_click=admin_choice_bet_company),
-            Button(text=Const("Olimp Bet"), id="Olimp", on_click=admin_choice_bet_company),
+            Button(text=Const("PARI"), id="Pari", on_click=admin_choice_bet_company),
+            Button(text=Const("Up-x"), id="Upx", on_click=admin_choice_bet_company),
         ),
         Back(Const("◀️"), id="back"),
         getter=get_start_message,
