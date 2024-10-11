@@ -27,11 +27,7 @@ class Repository(Generic[AbstractModel]):
         self.session = session
 
     async def get(self, ident: int | str) -> AbstractModel:
-        """Get an ONE model from the database with PK.
-
-        :param ident: Key which need to find entry in database
-        :return:
-        """
+        """Get an ONE model from the database with PK."""
         return await self.session.get(entity=self.type_model, ident=ident)
 
     async def get_by_where(self, whereclause, options: list | None = None) -> AbstractModel | None:
@@ -45,17 +41,16 @@ class Repository(Generic[AbstractModel]):
         if options:
             statement = statement.options(*options)
 
-        return (await self.session.execute(statement)).scalars().one_or_none()
+        return (await self.session.execute(statement)).scalar_one_or_none()
 
     async def get_many(
         self,
         whereclause,
-        limit: int = 100,
         order_by=None,
         options: list | None = None,
     ) -> Sequence[Base]:
         """Get many models from the database with whereclause."""
-        statement = select(self.type_model).where(whereclause).limit(limit)
+        statement = select(self.type_model).where(whereclause)
         if order_by:
             statement = statement.order_by(order_by)
         if options:

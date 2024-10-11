@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from sqlalchemy import (
     BigInteger,
     ForeignKey,
@@ -13,16 +15,21 @@ from sqlalchemy.orm import (
 from .base import Base
 
 
+if TYPE_CHECKING:
+    from .bookmaker import Bookmaker
+    from .streamer import Streamer
+    from .user import User
+
+
 class Referral(Base):
     """Referral model."""
-
-    __tablename__ = "referrals"
 
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id"),
         nullable=True,
         default=None,
     )
+
     telegram_id: Mapped[int] = mapped_column(
         BigInteger,
         nullable=True,
@@ -36,6 +43,7 @@ class Referral(Base):
         ForeignKey("streamers.id"),
         nullable=False,
     )
+
     referral_key: Mapped[str] = mapped_column(
         String,
         unique=True,
@@ -44,12 +52,16 @@ class Referral(Base):
 
     __table_args__ = (UniqueConstraint("user_id", "bookmaker_id", name="uq_user_bookmaker"),)
 
-    user: Mapped["User"] = relationship("User", back_populates="referrals")  # noqa:F821
-    bookmaker: Mapped["Bookmaker"] = relationship(  # noqa:F821
+    bookmaker: Mapped["Bookmaker"] = relationship(
         "Bookmaker",
         back_populates="referrals",
     )
-    streamer: Mapped["Streamer"] = relationship(  # noqa:F821
+    streamer: Mapped["Streamer"] = relationship(
         "Streamer",
+        back_populates="referrals",
+    )
+
+    user: Mapped["User"] = relationship(
+        "User",
         back_populates="referrals",
     )

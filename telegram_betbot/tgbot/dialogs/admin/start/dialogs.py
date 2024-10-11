@@ -6,13 +6,16 @@ from aiogram_dialog.widgets.kbd import (
     Back,
     Button,
     Row,
+    Start,
     SwitchTo,
 )
 from aiogram_dialog.widgets.text import Const, Format
 
+from magic_filter import F
+
 from telegram_betbot.tgbot.dialogs.admin.start.getters import (
+    admin_get_choice_data,
     admin_get_start_message,
-    get_choice_data,
 )
 from telegram_betbot.tgbot.dialogs.admin.start.handlers import (
     admin_check_input_type,
@@ -23,10 +26,8 @@ from telegram_betbot.tgbot.dialogs.admin.start.handlers import (
     admin_error_input_handler,
     admin_wrong_type_input,
 )
-from telegram_betbot.tgbot.dialogs.start.getters import get_start_message
-from telegram_betbot.tgbot.filters.admin import is_choice_add_link, is_choice_add_referral
 from telegram_betbot.tgbot.lexicon.lexicon import LEXICON_ADMIN
-from telegram_betbot.tgbot.states.admin import AdminSG
+from telegram_betbot.tgbot.states.admin import AdminNewsletterSG, AdminSG
 
 
 admin_start_dialog = Dialog(
@@ -44,6 +45,11 @@ admin_start_dialog = Dialog(
                 on_click=admin_choice_add_referal_or_work_with_link,
             ),
         ),
+        Start(
+            text=Const(LEXICON_ADMIN["make_newsletter"]),
+            state=AdminNewsletterSG.choice_bm,
+            id="make_newsletter",
+        ),
         getter=admin_get_start_message,
         state=AdminSG.start,
     ),
@@ -54,7 +60,6 @@ admin_start_dialog = Dialog(
             Button(text=Const("Up-x"), id="Upx", on_click=admin_choice_bet_company),
         ),
         Back(Const("◀️"), id="back"),
-        getter=get_start_message,
         state=AdminSG.choice_bm,
     ),
     Window(
@@ -65,17 +70,16 @@ admin_start_dialog = Dialog(
             Button(text=Const("streamer_3"), id="streamer_3", on_click=admin_choice_streamer),
         ),
         Back(Const("◀️"), id="back"),
-        getter=get_start_message,
         state=AdminSG.choice_streamer,
     ),
     Window(
         Format(
             LEXICON_ADMIN["add_referral_info"],
-            when=is_choice_add_referral,
+            when=F["dialog_data"]["add_referal"],
         ),
         Format(
             LEXICON_ADMIN["change_link_info"],
-            when=is_choice_add_link,
+            when=~F["dialog_data"]["add_referal"],
         ),
         TextInput(
             id="input_link_or_id",
@@ -89,22 +93,22 @@ admin_start_dialog = Dialog(
         ),
         Back(Const("◀️"), id="back"),
         parse_mode="HTML",
-        getter=get_choice_data,
+        getter=admin_get_choice_data,
         state=AdminSG.main_change,
     ),
     Window(
         Format(
             LEXICON_ADMIN["success_add_referral"],
-            when=is_choice_add_referral,
+            when=F["dialog_data"]["add_referal"],
         ),
         Format(
             LEXICON_ADMIN["success_add_link"],
-            when=is_choice_add_link,
+            when=~F["dialog_data"]["add_referal"],
         ),
         Back(Const(LEXICON_ADMIN["back"]), id="back"),
         SwitchTo(Const(LEXICON_ADMIN["in_start"]), id="in_start", state=AdminSG.start),
         parse_mode="HTML",
-        getter=get_choice_data,
+        getter=admin_get_choice_data,
         state=AdminSG.end_step,
     ),
 )

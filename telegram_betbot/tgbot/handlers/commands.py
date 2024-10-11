@@ -1,6 +1,10 @@
 from aiogram import F, Router
 from aiogram.filters import CommandStart
-from aiogram.types import Message, User
+from aiogram.types import (
+    Chat,
+    Message,
+    User,
+)
 
 from aiogram_dialog import DialogManager, StartMode
 
@@ -15,31 +19,32 @@ from telegram_betbot.tgbot.states.start import StartSG
 commands_router = Router()
 
 
+def _extract_user_data(telegram_user: User, chat: Chat) -> dict[str, any]:
+    return {
+        "telegram_id": telegram_user.id,
+        "first_name": telegram_user.first_name,
+        "last_name": telegram_user.last_name,
+        "language_code": telegram_user.language_code,
+        "user_name": telegram_user.username,
+        "chat_id": chat.id,
+        "chat_type": chat.type,
+    }
+
+
 @commands_router.message(F.chat.type == "private", CommandStart())
 async def process_start_command(
     message: Message,
     dialog_manager: DialogManager,
     db: Database,
 ) -> None:
-    telegram_user: User = message.from_user
+    user_data = _extract_user_data(telegram_user=message.from_user, chat=message.chat)
 
-    user_data: dict[str, any] = {
-        "telegram_id": telegram_user.id,
-        "first_name": telegram_user.first_name,
-        "last_name": telegram_user.last_name,
-        "language_code": telegram_user.language_code,
-        "user_name": telegram_user.username,
-    }
-
-    user_service: UserService = UserService(db)
-
-    user_role: int = await user_service.get_role_or_create_user(user_data)
-
+    user_role = await UserService(db).get_role_or_create_user(user_data)
     if user_role == Role.ADMINISTRATOR:
         await dialog_manager.start(state=AdminSG.start, mode=StartMode.RESET_STACK)
     else:
         occupied_bookmakers, free_bookmakers = await ReferralService(db).check_free_bookmakers(
-            telegram_id=telegram_user.id,
+            telegram_id=message.from_user.id,
         )
 
         await dialog_manager.start(

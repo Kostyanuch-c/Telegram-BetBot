@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from sqlalchemy import String
 from sqlalchemy.orm import (
     Mapped,
@@ -8,10 +10,13 @@ from sqlalchemy.orm import (
 from .base import Base
 
 
+if TYPE_CHECKING:
+    from .referral import Referral
+    from .streamer import Streamer
+
+
 class Bookmaker(Base):
     """Bookmaker model."""
-
-    __tablename__ = "bookmakers"
 
     name: Mapped[str] = mapped_column(
         String,
@@ -19,12 +24,12 @@ class Bookmaker(Base):
         nullable=False,
     )
 
-    referrals: Mapped[list["Referral"]] = relationship(  # noqa:F821
+    referrals: Mapped[list["Referral"]] = relationship(
         "Referral",
         back_populates="bookmaker",
     )
 
-    referral_links: Mapped[list["StreamerBookmakerMembership"]] = relationship(  # noqa:F821
-        "StreamerBookmakerMembership",
-        back_populates="bookmaker",
+    streamers: Mapped[list["Streamer"]] = relationship(
+        back_populates="bookmakers",
+        secondary="streamer_bookmaker_memberships",
     )

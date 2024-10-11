@@ -1,4 +1,11 @@
-from sqlalchemy import select
+from collections.abc import Sequence
+from typing import Any, cast
+
+from sqlalchemy import (
+    Row,
+    RowMapping,
+    select,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -18,12 +25,12 @@ class ReferralRepo(Repository[Referral]):
         super().__init__(type_model=Referral, session=session)
 
     async def create(
-        self,
-        bookmaker_id: int,
-        streamer_id: int,
-        referral_key: str,
-        user_id: int | None = None,
-        telegram_id: int | None = None,
+            self,
+            bookmaker_id: int,
+            streamer_id: int,
+            referral_key: str,
+            user_id: int | None = None,
+            telegram_id: int | None = None,
     ) -> None:
         referral = Referral(
             bookmaker_id=bookmaker_id,  # type: ignore[call-arg]
@@ -35,31 +42,33 @@ class ReferralRepo(Repository[Referral]):
         await self.session.merge(referral)
 
     async def get_data_for_referal(
-        self,
-        streamer_name: str,
-        bookmaker_name: str,
-        telegram_id: int = None,
-    ) -> tuple:
+            self,
+            streamer_name: str,
+            bookmaker_name: str,
+            telegram_id: int = None,
+    ) -> Row[tuple[Any, ...] | Any] | None:
         query = (
             select(Streamer.id, Bookmaker.id)
             .select_from(Streamer)
-            .join(Bookmaker, Bookmaker.name == bookmaker_name)
-            .where(Streamer.name == streamer_name)
+            .join(Bookmaker, cast("ColumnElement[bool]", Bookmaker.name == bookmaker_name))
+            .where(cast("ColumnElement[bool]", Streamer.name == streamer_name))
         )
 
         if telegram_id is not None:
-            query = query.join(User, User.telegram_id == telegram_id).add_columns(User.id)
+            query = query.join(
+                User, cast("ColumnElement[bool]", User.telegram_id == telegram_id),
+            ).add_columns(User.id)
 
         result = await self.session.execute(query)
 
         return result.one_or_none()
 
     async def create_many_referrals_for_one_streamer_and_bm(
-        self,
-        streamer_id: int,
-        bookmaker_id: int,
-        referral_keys: list[str],
-        user_id: int | None = None,
+            self,
+            streamer_id: int,
+            bookmaker_id: int,
+            referral_keys: list[str],
+            user_id: int | None = None,
     ) -> None:
         referrals = [
             Referral(
@@ -73,7 +82,7 @@ class ReferralRepo(Repository[Referral]):
         self.session.add_all(referrals)
 
     async def get_free_bookmakers_for_referral(self, telegram_id: int) -> tuple[dict, list]:
-        referrals: list[Referral] = await self.get_many(
+        referrals = await self.get_many(
             whereclause=Referral.telegram_id == telegram_id,
             options=[joinedload(Referral.bookmaker), joinedload(Referral.streamer)],
         )
@@ -91,3 +100,19 @@ class ReferralRepo(Repository[Referral]):
         ]
 
         return occupied_bookmakers, free_bookmakers
+
+    async def get_ids_refs_by_streamer_name_and_bm_name(
+            self,
+            streamer_name: str,
+            bookmaker_name: str,
+    ) -> Sequence[Row[Any] | RowMapping | Any]:
+        query = (
+            select(Referral.telegram_id)
+            .join(cast("ColumnElement", Referral.bookmaker))
+            .join(cast("ColumnElement", Referral.streamer))
+            .where(cast("ColumnElement[bool]", Streamer.name == streamer_name))
+            .where(cast("ColumnElement[bool]", Bookmaker.name == bookmaker_name))
+        )
+        result = await self.session.execute(query)
+
+        return result.scalars().all()

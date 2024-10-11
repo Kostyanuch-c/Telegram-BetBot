@@ -37,7 +37,7 @@ project-stop:
 	docker compose down --remove-orphans ${MODE}
 
 .PHONY: build-recreate
-build:
+build-recreate:
 	docker compose up --build --force-recreate
 
 .PHONY: init_dump

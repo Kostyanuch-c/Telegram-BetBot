@@ -1,4 +1,10 @@
-from sqlalchemy import select, update
+from typing import cast
+
+from sqlalchemy import (
+    Row,
+    select,
+    update,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from telegram_betbot.database.models import (
@@ -24,8 +30,10 @@ class StreamerBookmakerRepo(Repository[StreamerBookmakerMembership]):
         stmt = (
             update(StreamerBookmakerMembership)
             .where(
-                StreamerBookmakerMembership.bookmaker_id == bookmaker_id,
-                StreamerBookmakerMembership.streamer_id == streamer_id,
+                cast(
+                    "ColumnElement[bool]", StreamerBookmakerMembership.bookmaker_id == bookmaker_id,
+                ),
+                cast("ColumnElement[bool]", StreamerBookmakerMembership.streamer_id == streamer_id),
             )
             .values(referral_link=referral_link)
         )
@@ -42,11 +50,11 @@ class StreamerBookmakerRepo(Repository[StreamerBookmakerMembership]):
         self,
         streamer_name: str,
         bookmaker_name: str,
-    ) -> tuple:
+    ) -> Row[tuple[Streamer, Bookmaker]] | None:
         query = (
             select(Streamer, Bookmaker)
-            .join(Bookmaker, Bookmaker.name == bookmaker_name)
-            .where(Streamer.name == streamer_name)
+            .join(Bookmaker, cast("ColumnElement[bool]", Bookmaker.name == bookmaker_name))
+            .where(cast("ColumnElement[bool]", Streamer.name == streamer_name))
         )
 
         result = await self.session.execute(query)

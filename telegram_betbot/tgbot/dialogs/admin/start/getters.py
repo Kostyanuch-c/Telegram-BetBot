@@ -17,7 +17,7 @@ async def admin_get_start_message(
     }
 
 
-async def get_choice_data(dialog_manager: DialogManager, **kwargs):
+async def admin_get_choice_data(dialog_manager: DialogManager, **kwargs):
     bookmaker = dialog_manager.dialog_data.get("bet_company")
     streamer = dialog_manager.dialog_data.get("streamer")
 

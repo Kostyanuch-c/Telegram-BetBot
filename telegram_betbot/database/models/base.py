@@ -1,7 +1,11 @@
 """Base model."""
-from sqlalchemy import Integer, MetaData
+from sqlalchemy import BigInteger, MetaData
 from sqlalchemy.ext.declarative import as_declarative
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import (
+    declared_attr,
+    Mapped,
+    mapped_column,
+)
 
 
 metadata = MetaData(
@@ -19,10 +23,16 @@ metadata = MetaData(
 class Base:
     """Abstract model with declarative base functionality."""
 
+    __abstract__ = True
     __allow_unmapped__ = False
 
-    id: Mapped[int] = mapped_column(  # noqa: A003
-        Integer,
+    @classmethod
+    @declared_attr.directive
+    def __tablename__(cls) -> str:
+        return f"{cls.__name__.lower()}s"
+
+    id: Mapped[int] = mapped_column(  # noqa:A003
+        BigInteger,
         autoincrement=True,
         primary_key=True,
     )

@@ -1,9 +1,9 @@
-from telegram_betbot.database.models.base import Base
-from telegram_betbot.database.models.bookmakers import Bookmaker
-from telegram_betbot.database.models.referrals import Referral
-from telegram_betbot.database.models.streamer_referral_links import StreamerBookmakerMembership
-from telegram_betbot.database.models.streamers import Streamer
-from telegram_betbot.database.models.users import User
+from .base import Base
+from .bookmaker import Bookmaker
+from .referral import Referral
+from .streamer import Streamer
+from .streamer_referral_link import StreamerBookmakerMembership
+from .user import User
 
 
 __all__ = ("Base", "StreamerBookmakerMembership", "Streamer", "Bookmaker", "Referral", "User")

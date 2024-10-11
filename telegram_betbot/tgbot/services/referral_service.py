@@ -90,3 +90,13 @@ class ReferralService:
             return await self.db.referral.get_free_bookmakers_for_referral(
                 telegram_id=telegram_id,
             )
+
+    async def get_referrals_by_bm_and_streamer(
+        self, streamer_name: str, bookmaker_name: str,
+    ) -> list[int]:
+        async with self.db.referral.session.begin():
+            refs = await self.db.referral.get_ids_refs_by_streamer_name_and_bm_name(
+                streamer_name=streamer_name,
+                bookmaker_name=bookmaker_name,
+            )
+            return refs

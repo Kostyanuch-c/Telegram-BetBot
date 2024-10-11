@@ -1,6 +1,5 @@
 """User repository file."""
 
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from telegram_betbot.database.models import User
@@ -18,6 +17,8 @@ class UserRepo(Repository[User]):
     async def create_and_return(
         self,
         telegram_id: int,
+        chat_id: int,
+        chat_type: str,
         user_name: str | None = None,
         first_name: str | None = None,
         last_name: str | None = None,
@@ -26,18 +27,20 @@ class UserRepo(Repository[User]):
     ) -> User:
         user = User(
             telegram_id=telegram_id,  # type: ignore[call-arg]
+            chat_id=chat_id,  # type: ignore[call-arg]
+            chat_type=chat_type,  # type: ignore[call-arg]
             user_name=user_name,  # type: ignore[call-arg]
             first_name=first_name,  # type: ignore[call-arg]
             last_name=last_name,  # type: ignore[call-arg]
             language_code=language_code,  # type: ignore[call-arg]
             role=role,  # type: ignore[call-arg]
         )
-        await self.session.merge(user)
 
+        self.session.add(user)
         return user
 
-    async def get_role(self, telegram_id: int) -> Role:
-        """Get user role by id."""
-        return await self.session.scalar(
-            select(User.role).where(User.telegram_id == telegram_id).limit(1),
-        )
+    # async def get_role(self, telegram_id: int) -> Role:
+    #     """Get user role by id."""
+    #     return await self.session.scalar(
+    #         select(User.role).where(User.telegram_id == telegram_id).limit(1),
+    #     )

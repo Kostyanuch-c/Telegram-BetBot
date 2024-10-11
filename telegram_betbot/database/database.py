@@ -32,6 +32,7 @@ class Database:
     """ Referral repository """
     streamers_and_bookmakers: StreamerBookmakerRepo
     """ Streamer referral link repository """
+    """ Chat repository """
     session: AsyncSession
 
     def __init__(

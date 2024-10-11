@@ -9,5 +9,4 @@ isort-show-traceback = True
 exclude = .git,__pycache__,.venv,dist,build, */migrations/*.py, *tests*
 
 ignore =
-# line break occurred before a binary operator
-    W503,  D100, D101, D104, D106, E800
+    W503,  D100, D101, D104, D106, E800, F821

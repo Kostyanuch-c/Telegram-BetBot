@@ -1,7 +1,10 @@
 """User model file."""
+from typing import TYPE_CHECKING
+
 from sqlalchemy import (
     BigInteger,
     Enum,
+    String,
     Text,
 )
 from sqlalchemy.orm import (
@@ -15,10 +18,12 @@ from telegram_betbot.tgbot.enums.role import Role
 from .base import Base
 
 
+if TYPE_CHECKING:
+    from .referral import Referral
+
+
 class User(Base):
     """User model."""
-
-    __tablename__ = "users"
 
     telegram_id: Mapped[int] = mapped_column(
         BigInteger,
@@ -56,7 +61,12 @@ class User(Base):
     role: Mapped[Role] = mapped_column(Enum(Role), default=Role.USER)
     """ User's role """
 
-    referrals: Mapped[list["Referral"]] = relationship(  # noqa:F821
+    chat_id: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False)
+
+    chat_type: Mapped[str] = mapped_column(String, nullable=False, unique=False)
+
+    referrals: Mapped[list["Referral"]] = relationship(
         "Referral",
         back_populates="user",
     )
+    """User referrals """
