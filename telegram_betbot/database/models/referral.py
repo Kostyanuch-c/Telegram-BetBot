@@ -2,8 +2,8 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     BigInteger,
+    Boolean,
     ForeignKey,
-    String,
     UniqueConstraint,
 )
 from sqlalchemy.orm import (
@@ -26,14 +26,12 @@ class Referral(Base):
 
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id"),
-        nullable=True,
-        default=None,
+        nullable=False,
     )
 
     telegram_id: Mapped[int] = mapped_column(
         BigInteger,
-        nullable=True,
-        default=None,
+        nullable=False,
     )
     bookmaker_id: Mapped[int] = mapped_column(
         ForeignKey("bookmakers.id"),
@@ -45,9 +43,15 @@ class Referral(Base):
     )
 
     referral_key: Mapped[str] = mapped_column(
-        String,
+        BigInteger,
         unique=True,
         nullable=False,
+    )
+
+    is_confirmed: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
     )
 
     __table_args__ = (UniqueConstraint("user_id", "bookmaker_id", name="uq_user_bookmaker"),)

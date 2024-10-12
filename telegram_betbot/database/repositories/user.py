@@ -15,20 +15,16 @@ class UserRepo(Repository[User]):
         super().__init__(type_model=User, session=session)
 
     async def create_and_return(
-        self,
-        telegram_id: int,
-        chat_id: int,
-        chat_type: str,
-        user_name: str | None = None,
-        first_name: str | None = None,
-        last_name: str | None = None,
-        language_code: str | None = None,
-        role: Role = Role.USER,
+            self,
+            telegram_id: int,
+            user_name: str | None = None,
+            first_name: str | None = None,
+            last_name: str | None = None,
+            language_code: str | None = None,
+            role: Role = Role.USER,
     ) -> User:
         user = User(
             telegram_id=telegram_id,  # type: ignore[call-arg]
-            chat_id=chat_id,  # type: ignore[call-arg]
-            chat_type=chat_type,  # type: ignore[call-arg]
             user_name=user_name,  # type: ignore[call-arg]
             first_name=first_name,  # type: ignore[call-arg]
             last_name=last_name,  # type: ignore[call-arg]
@@ -38,9 +34,3 @@ class UserRepo(Repository[User]):
 
         self.session.add(user)
         return user
-
-    # async def get_role(self, telegram_id: int) -> Role:
-    #     """Get user role by id."""
-    #     return await self.session.scalar(
-    #         select(User.role).where(User.telegram_id == telegram_id).limit(1),
-    #     )

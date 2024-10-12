@@ -1,5 +1,6 @@
 import logging
 import re
+from collections.abc import Sequence
 
 from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
@@ -22,10 +23,10 @@ class ReferralService:
         self.db = db
 
     async def create_new_referral_keys(
-        self,
-        bookmaker_name: str,
-        streamer_name: str,
-        referral_keys: list[str],
+            self,
+            bookmaker_name: str,
+            streamer_name: str,
+            referral_keys: list[str],
     ) -> None:
         try:
             async with self.db.referral.session.begin():
@@ -52,11 +53,11 @@ class ReferralService:
             raise ReferralKeyUniqueError
 
     async def check_and_create_referral(
-        self,
-        bookmaker_name: str,
-        streamer_name: str,
-        telegram_id: int,
-        referral_key: str,
+            self,
+            bookmaker_name: str,
+            streamer_name: str,
+            telegram_id: int,
+            referral_key: str,
     ) -> bool:
         async with self.db.referral.session.begin():
             streamer_id, bookmaker_id, user_id = await self.db.referral.get_data_for_referal(
@@ -92,11 +93,12 @@ class ReferralService:
             )
 
     async def get_referrals_by_bm_and_streamer(
-        self, streamer_name: str, bookmaker_name: str,
-    ) -> list[int]:
+            self, streamer_name: str, bookmaker_name: str,
+    ) -> Sequence[int]:
         async with self.db.referral.session.begin():
             refs = await self.db.referral.get_ids_refs_by_streamer_name_and_bm_name(
                 streamer_name=streamer_name,
                 bookmaker_name=bookmaker_name,
             )
+
             return refs

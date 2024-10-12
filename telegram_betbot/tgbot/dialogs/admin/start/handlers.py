@@ -8,14 +8,15 @@ from aiogram_dialog.widgets.input import ManagedTextInput, MessageInput
 from aiogram_dialog.widgets.kbd import Button
 
 from telegram_betbot.tgbot.exeptions.admin import ReferralKeyUniqueError
+from telegram_betbot.tgbot.lexicon.lexicon import LEXICON_ADMIN
 from telegram_betbot.tgbot.services.referral_service import ReferralService
 from telegram_betbot.tgbot.services.streamer_bookmaker_service import StreamerBookmakerService
 
 
 async def admin_choice_add_referal_or_work_with_link(
-    callback: CallbackQuery,
-    button: Button,
-    dialog_manager: DialogManager,
+        callback: CallbackQuery,
+        button: Button,
+        dialog_manager: DialogManager,
 ):
     dialog_manager.dialog_data["add_referal"] = (
         True if button.widget_id == "add_referral_keys" else False
@@ -24,9 +25,9 @@ async def admin_choice_add_referal_or_work_with_link(
 
 
 async def admin_choice_bet_company(
-    callback: CallbackQuery,
-    button: Button,
-    dialog_manager: DialogManager,
+        callback: CallbackQuery,
+        button: Button,
+        dialog_manager: DialogManager,
 ):
     admin_choice = button.widget_id
     dialog_manager.dialog_data["bet_company"] = admin_choice
@@ -34,9 +35,9 @@ async def admin_choice_bet_company(
 
 
 async def admin_choice_streamer(
-    callback: CallbackQuery,
-    button: Button,
-    dialog_manager: DialogManager,
+        callback: CallbackQuery,
+        button: Button,
+        dialog_manager: DialogManager,
 ):
     admin_choice = button.widget_id
     dialog_manager.dialog_data["streamer"] = admin_choice
@@ -44,36 +45,28 @@ async def admin_choice_streamer(
     await dialog_manager.next()
 
 
-def admin_check_input_type(text: any) -> str:
-    if isinstance(text, str) and len(text.strip()) > 1:
-        return text
-    raise ValueError
-
-
-async def admin_error_input_handler(
-    message: Message,
-    widget: ManagedTextInput,
-    dialog_manager: DialogManager,
-    error: ValueError,
+async def admin_error_input_add_referral_or_link_handler(
+        message: Message,
+        widget: ManagedTextInput,
+        dialog_manager: DialogManager,
+        error: ValueError,
 ):
-    await message.answer(
-        text="Вы ввели некорректные данные. Сообщение должно быть строкой, больше одного символа!",
-    )
+    await message.answer(text=LEXICON_ADMIN['error_add_referral_or_link'])
 
 
-async def admin_wrong_type_input(
-    message: Message,
-    widget: MessageInput,
-    dialog_manager: DialogManager,
+async def admin_wrong_type_input_handler(
+        message: Message,
+        widget: MessageInput,
+        dialog_manager: DialogManager,
 ):
-    await message.answer(text="Введите, пожалуйста, текстовое сообщение.")
+    await message.answer(text=LEXICON_ADMIN['error_wrong_type_input'])
 
 
 async def admin_correct_input_handler(
-    message: Message,
-    widget: ManagedTextInput,
-    dialog_manager: DialogManager,
-    text: str,
+        message: Message,
+        widget: ManagedTextInput,
+        dialog_manager: DialogManager,
+        text: str,
 ) -> None:
     db = dialog_manager.middleware_data["db"]
     bookmaker = dialog_manager.dialog_data["bet_company"]
@@ -100,4 +93,4 @@ async def admin_correct_input_handler(
             )
             await dialog_manager.next()
         else:
-            await message.answer("Вы отправили не ссылку!")
+            await message.answer(LEXICON_ADMIN['error_is_not_url'])

@@ -18,14 +18,14 @@ from telegram_betbot.tgbot.dialogs.admin.start.getters import (
     admin_get_start_message,
 )
 from telegram_betbot.tgbot.dialogs.admin.start.handlers import (
-    admin_check_input_type,
     admin_choice_add_referal_or_work_with_link,
     admin_choice_bet_company,
     admin_choice_streamer,
     admin_correct_input_handler,
-    admin_error_input_handler,
-    admin_wrong_type_input,
+    admin_error_input_add_referral_or_link_handler,
+    admin_wrong_type_input_handler,
 )
+from telegram_betbot.tgbot.dialogs.admin.start.input_validator import admin_check_type_validator
 from telegram_betbot.tgbot.lexicon.lexicon import LEXICON_ADMIN
 from telegram_betbot.tgbot.states.admin import AdminNewsletterSG, AdminSG
 
@@ -83,12 +83,12 @@ admin_start_dialog = Dialog(
         ),
         TextInput(
             id="input_link_or_id",
-            type_factory=admin_check_input_type,
+            type_factory=admin_check_type_validator,
             on_success=admin_correct_input_handler,
-            on_error=admin_error_input_handler,
+            on_error=admin_error_input_add_referral_or_link_handler,
         ),
         MessageInput(
-            func=admin_wrong_type_input,
+            func=admin_wrong_type_input_handler,
             content_types=ContentType.ANY,
         ),
         Back(Const("◀️"), id="back"),

@@ -21,7 +21,6 @@ from telegram_betbot.tgbot.dialogs.start.getters import (
 )
 from telegram_betbot.tgbot.dialogs.start.handlers import (
     back_button_in_process_check_referal_id,
-    check_input_type,
     correct_input_handler,
     error_input_id_handler,
     process_choice_bet_company,
@@ -30,6 +29,7 @@ from telegram_betbot.tgbot.dialogs.start.handlers import (
     to_start_after_check,
     wrong_type_input,
 )
+from telegram_betbot.tgbot.dialogs.start.input_validator import check_referral_id_validator
 from telegram_betbot.tgbot.lexicon.lexicon import LEXICON_RU
 from telegram_betbot.tgbot.states.start import StartSG
 
@@ -122,7 +122,7 @@ start_dialog = Dialog(
         Format(LEXICON_RU["question_correct"], when=F["dialog_data"]["wrong_id"]),
         TextInput(
             id="input_link_or_id",
-            type_factory=check_input_type,
+            type_factory=check_referral_id_validator,
             on_success=correct_input_handler,
             on_error=error_input_id_handler,
         ),

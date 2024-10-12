@@ -1,5 +1,3 @@
-from pprint import pprint
-
 from aiogram.types import CallbackQuery, Message
 
 from aiogram_dialog import DialogManager
@@ -11,6 +9,7 @@ from telegram_betbot.tgbot.exeptions.referral import (
     ReferralAlreadyRegisteredError,
     ReferralInvalidError,
 )
+from telegram_betbot.tgbot.lexicon.lexicon import LEXICON_RU_ERRORS
 from telegram_betbot.tgbot.services.referral_service import ReferralService
 from telegram_betbot.tgbot.states.start import StartSG
 
@@ -31,20 +30,15 @@ async def process_choice_bet_company(
         dialog_manager: DialogManager,
 ):
     user_choice = button.widget_id
-    pprint(dialog_manager.dialog_data)
-    db = dialog_manager.middleware_data["db"]
-    telegram_id = callback.from_user.id
 
-    _, free_bookmakers = await ReferralService(db).check_free_bookmakers(
-        telegram_id=telegram_id,
-    )
+    free_bookmakers = dialog_manager.dialog_data["free_bookmakers"]
 
     if user_choice in free_bookmakers:
         dialog_manager.dialog_data["bet_company"] = user_choice
 
         await dialog_manager.next()
     else:
-        await callback.answer(text="Вы являетесь рефераллом у этого букмеркера")
+        await callback.answer(text=LEXICON_RU_ERRORS['choice_not_free_bm'])
 
 
 async def process_choice_streamer(
@@ -72,25 +66,17 @@ async def back_button_in_process_check_referal_id(
         await dialog_manager.back()
 
 
-def check_input_type(text: any) -> str:
-    if isinstance(text, str) and len(text.strip()) > 1:
-        return text
-    raise ValueError
-
-
 async def error_input_id_handler(
         message: Message,
         widget: ManagedTextInput,
         dialog_manager: DialogManager,
         error: ValueError,
 ):
-    await message.answer(
-        text="Вы ввели некорректные данные. Сообщение должно быть больше одного символа!",
-    )
+    await message.answer(text=LEXICON_RU_ERRORS['error_input_referral_id'])
 
 
 async def wrong_type_input(message: Message, widget: MessageInput, dialog_manager: DialogManager):
-    await message.answer(text="Введите, пожалуйста, текстовое сообщение.")
+    await message.answer(text=LEXICON_RU_ERRORS['wrong_type_input_referral_id'])
 
 
 async def correct_input_handler(

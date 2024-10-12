@@ -1,107 +1,155 @@
 import asyncio
-import logging
-from pprint import pprint
 
 from aiogram import Bot
-from aiogram.exceptions import (
-    DetailedAiogramError,
-    TelegramForbiddenError,
-    TelegramRetryAfter,
-)
 from aiogram.types import CallbackQuery, Message
 
-from aiogram_dialog import DialogManager
+from aiogram_dialog import DialogManager, ShowMode
 from aiogram_dialog.widgets.input import ManagedTextInput, MessageInput
 from aiogram_dialog.widgets.kbd import Button
 
+from telegram_betbot.tgbot.dialogs.admin.newsletter.newsletter import (
+    send_message_to_user,
+    send_newsletter_message_to_admin_for_check,
+)
+from telegram_betbot.tgbot.keyboards.url_keyboard import create_keyboard_from_data
+from telegram_betbot.tgbot.lexicon.lexicon import LEXICON_ADMIN_ERRORS
 from telegram_betbot.tgbot.services.referral_service import ReferralService
 from telegram_betbot.tgbot.states.admin import AdminNewsletterSG
 
 
-logger = logging.getLogger(__name__)
-
-
 async def admin_button_clear_data_post(
-    callback: CallbackQuery,
-    button: Button,
-    dialog_manager: DialogManager,
+        callback: CallbackQuery,
+        button: Button,
+        dialog_manager: DialogManager,
 ):
     dialog_manager.dialog_data.get("newsletter", {}).clear()
     await dialog_manager.back()
 
 
-async def admin_correct_input_body_post(
-    message: Message,
-    widget: ManagedTextInput,
-    dialog_manager: DialogManager,
-    text: str,
+async def admin_correct_input_body_post_handler(
+        message: Message,
+        widget: ManagedTextInput,
+        dialog_manager: DialogManager,
+        text: str,
 ) -> None:
     newsletter_data = dialog_manager.dialog_data.get("newsletter", {})
-
     newsletter_data["text"] = text
-    photo = newsletter_data.get("photo")
 
     dialog_manager.dialog_data["newsletter"] = newsletter_data
-    bot: Bot = dialog_manager.middleware_data["bot"]
 
-    if photo:
-        await bot.send_photo(
-            chat_id=message.chat.id,
-            photo=photo,
-            caption=text,
+    changing_mod = newsletter_data.get('changing_mod')
+    if changing_mod:
+        await send_newsletter_message_to_admin_for_check(
+            newsletter_data=newsletter_data,
+            dialog_manager=dialog_manager,
+            admin_chat_id=message.chat.id,
         )
         await dialog_manager.switch_to(state=AdminNewsletterSG.check_newsletter)
     else:
         await dialog_manager.next()
 
 
-async def admin_wrong_type_input_photo_for_newsletter(
-    message: Message,
-    widget: MessageInput,
-    dialog_manager: DialogManager,
+async def admin_wrong_type_input_photo_for_newsletter_handler(
+        message: Message,
+        widget: MessageInput,
+        dialog_manager: DialogManager,
 ):
-    await message.answer(text="Отправте, пожалуйста, фото!")
+    await message.answer(text=LEXICON_ADMIN_ERRORS['error_inout_type_photo'])
 
 
 async def admin_choice_post_without_photo(
-    callback: CallbackQuery,
-    button: Button,
-    dialog_manager: DialogManager,
+        callback: CallbackQuery,
+        button: Button,
+        dialog_manager: DialogManager,
 ) -> None:
-    newsletter_data = dialog_manager.dialog_data["newsletter"]
-    text = newsletter_data.get("text")
-
-    await callback.bot.send_message(chat_id=callback.message.chat.id, text=text)
-
     await dialog_manager.next()
 
 
-async def admin_correct_input_photo_for_newsletter(
-    message: Message,
-    widget: MessageInput,
-    dialog_manager: DialogManager,
+async def admin_correct_input_photo_for_newsletter_handler(
+        message: Message,
+        widget: MessageInput,
+        dialog_manager: DialogManager,
 ) -> None:
     dialog_manager.dialog_data["newsletter"]["photo"] = message.photo[1].file_id
-    pprint(dialog_manager.dialog_data)
+    newsletter_data = dialog_manager.dialog_data.get("newsletter")
+
+    changing_mod = newsletter_data.get('changing_mod')
+    if changing_mod:
+        await send_newsletter_message_to_admin_for_check(
+            newsletter_data=newsletter_data,
+            dialog_manager=dialog_manager,
+            admin_chat_id=message.chat.id,
+        )
+        await dialog_manager.switch_to(state=AdminNewsletterSG.check_newsletter)
+    else:
+        await dialog_manager.next()
+
+
+async def admin_choice_post_without_url_button(
+        callback: CallbackQuery,
+        button: Button,
+        dialog_manager: DialogManager,
+) -> None:
+    """Can't check this handler with changing_mod=True """
     newsletter_data = dialog_manager.dialog_data["newsletter"]
-    photo = newsletter_data.get("photo")
     text = newsletter_data.get("text")
+    photo = newsletter_data.get("photo")
+
+    dialog_manager.dialog_data["newsletter"]["changing_mod"] = True
 
     bot: Bot = dialog_manager.middleware_data["bot"]
+    if photo:
+        await bot.send_photo(
+            chat_id=callback.message.chat.id,
+            photo=photo,
+            caption=text,
+        )
+        await dialog_manager.switch_to(state=AdminNewsletterSG.check_newsletter)
+    else:
+        await callback.bot.send_message(chat_id=callback.message.chat.id, text=text)
+        dialog_manager.show_mode = ShowMode.SEND
+        await dialog_manager.next()
 
-    await bot.send_photo(
-        chat_id=message.chat.id,
-        photo=photo,
-        caption=text,
+
+async def admin_error_input_text_and_url_handler(
+        message: Message,
+        widget: ManagedTextInput,
+        dialog_manager: DialogManager,
+        error: ValueError,
+):
+    await message.answer(text=str(error))
+
+
+async def admin_correct_input_url_newsletter_handler(
+        message: Message,
+        widget: ManagedTextInput,
+        dialog_manager: DialogManager,
+        text: str,
+):
+    dialog_manager.dialog_data["newsletter"]["changing_mod"] = True
+
+    button_text, url = text.strip().split(maxsplit=1)
+
+    dialog_manager.dialog_data["newsletter"]["keyboard_data"] = {
+        "url": url,
+        "text": button_text,
+    }
+
+    newsletter_data = dialog_manager.dialog_data["newsletter"]
+
+    await send_newsletter_message_to_admin_for_check(
+        newsletter_data=newsletter_data,
+        dialog_manager=dialog_manager,
+        admin_chat_id=message.chat.id,
     )
 
     await dialog_manager.next()
 
 
 async def admin_send_newsletter(
-    callback: CallbackQuery,
-    widget: Button,
-    dialog_manager: DialogManager,
+        callback: CallbackQuery,
+        widget: Button,
+        dialog_manager: DialogManager,
 ) -> None:
     db = dialog_manager.middleware_data["db"]
     bot: Bot = dialog_manager.middleware_data["bot"]
@@ -109,6 +157,9 @@ async def admin_send_newsletter(
     newsletter_data = dialog_manager.dialog_data["newsletter"]
     photo = newsletter_data.get("photo")
     text = newsletter_data.get("text")
+
+    keyboard_data = newsletter_data.get("keyboard_data", {})
+    keyboard = create_keyboard_from_data(keyboard_data)
 
     streamer_name = dialog_manager.dialog_data.get("streamer")
     bookmaker_name = dialog_manager.dialog_data.get("bet_company")
@@ -129,32 +180,16 @@ async def admin_send_newsletter(
             message=text,
             bot=bot,
             photo=photo,
+            keyboard=keyboard,
         )
         if success:
             successfully_sent += 1
         await asyncio.sleep(0.1)
 
-    result_message = f"Сообщений отправлено успешно: {successfully_sent} из {total_messages}"
-    await callback.message.answer(result_message)
+    dialog_manager.dialog_data['newsletter'].update({
+        'successfully_sent': successfully_sent,
+        'total_messages': total_messages,
+    })
 
-
-async def send_message_to_user(ref_id: int, message: str, bot: Bot, photo: str) -> bool:
-    try:
-        if photo:
-            await bot.send_photo(photo=photo, caption=message, chat_id=ref_id)
-        else:
-            await bot.send_message(chat_id=ref_id, text=message)
-        return True
-    except TelegramRetryAfter as e:
-        logger.error(
-            f"Rate limit exceeded: retrying after {e.retry_after} "
-            f"seconds for user with telegram_id {ref_id}",
-        )
-        await asyncio.sleep(e.retry_after)
-        return await send_message_to_user(ref_id, message, bot, photo)
-    except TelegramForbiddenError as e:
-        logger.error(f"Failed to send message to user with telegram_id {ref_id}: {e}")
-    except DetailedAiogramError as e:
-        logger.error(f"Detailed Aiogram error for user with telegram_id={ref_id}: {e}")
-
-    return False
+    dialog_manager.show_mode = ShowMode.SEND
+    await dialog_manager.next()

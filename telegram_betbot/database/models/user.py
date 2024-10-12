@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 from sqlalchemy import (
     BigInteger,
     Enum,
-    String,
     Text,
 )
 from sqlalchemy.orm import (
@@ -60,10 +59,6 @@ class User(Base):
 
     role: Mapped[Role] = mapped_column(Enum(Role), default=Role.USER)
     """ User's role """
-
-    chat_id: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False)
-
-    chat_type: Mapped[str] = mapped_column(String, nullable=False, unique=False)
 
     referrals: Mapped[list["Referral"]] = relationship(
         "Referral",

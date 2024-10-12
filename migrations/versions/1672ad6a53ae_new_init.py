@@ -1,8 +1,8 @@
 """New init
 
-Revision ID: 71064cc2560c
+Revision ID: 1672ad6a53ae
 Revises: 
-Create Date: 2024-10-11 16:10:41.780001
+Create Date: 2024-10-12 20:00:01.531098
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '71064cc2560c'
+revision: str = '1672ad6a53ae'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -39,19 +39,17 @@ def upgrade() -> None:
     sa.Column('last_name', sa.Text(), nullable=True),
     sa.Column('language_code', sa.Text(), nullable=True),
     sa.Column('role', sa.Enum('USER', 'ADMINISTRATOR', name='role'), nullable=False),
-    sa.Column('chat_id', sa.BigInteger(), nullable=False),
-    sa.Column('chat_type', sa.String(), nullable=False),
     sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_users')),
-    sa.UniqueConstraint('chat_id', name=op.f('uq_users_chat_id')),
     sa.UniqueConstraint('telegram_id', name=op.f('uq_users_telegram_id'))
     )
     op.create_table('referrals',
-    sa.Column('user_id', sa.BigInteger(), nullable=True),
-    sa.Column('telegram_id', sa.BigInteger(), nullable=True),
+    sa.Column('user_id', sa.BigInteger(), nullable=False),
+    sa.Column('telegram_id', sa.BigInteger(), nullable=False),
     sa.Column('bookmaker_id', sa.BigInteger(), nullable=False),
     sa.Column('streamer_id', sa.BigInteger(), nullable=False),
-    sa.Column('referral_key', sa.String(), nullable=False),
+    sa.Column('referral_key', sa.BigInteger(), nullable=False),
+    sa.Column('is_confirmed', sa.Boolean(), nullable=False),
     sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
     sa.ForeignKeyConstraint(['bookmaker_id'], ['bookmakers.id'], name=op.f('fk_referrals_bookmaker_id_bookmakers')),
     sa.ForeignKeyConstraint(['streamer_id'], ['streamers.id'], name=op.f('fk_referrals_streamer_id_streamers')),
