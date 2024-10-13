@@ -15,22 +15,14 @@ class StreamerBookmakerService:
 
     async def update_or_create_referral_link(
         self,
-        bookmaker_name: str,
-        streamer_name: str,
+        bookmaker_id: int,
+        streamer_id: int,
         referral_link: str,
     ) -> None:
         async with self.db.streamers_and_bookmakers.session.begin():
-            (
-                streamer,
-                bookmaker,
-            ) = await self.db.streamers_and_bookmakers.get_data_bookmaker_and_streamer(
-                bookmaker_name=bookmaker_name,
-                streamer_name=streamer_name,
-            )
-
             await self.db.streamers_and_bookmakers.update_or_create(
-                streamer_id=streamer.id,
-                bookmaker_id=bookmaker.id,
+                streamer_id=streamer_id,
+                bookmaker_id=bookmaker_id,
                 referral_link=referral_link,
             )
 

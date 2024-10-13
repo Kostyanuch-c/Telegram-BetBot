@@ -1,17 +1,9 @@
 from typing import cast
 
-from sqlalchemy import (
-    Row,
-    select,
-    update,
-)
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from telegram_betbot.database.models import (
-    Bookmaker,
-    Streamer,
-    StreamerBookmakerMembership,
-)
+from telegram_betbot.database.models import StreamerBookmakerMembership
 from telegram_betbot.database.repositories.abstract import Repository
 
 
@@ -31,7 +23,8 @@ class StreamerBookmakerRepo(Repository[StreamerBookmakerMembership]):
             update(StreamerBookmakerMembership)
             .where(
                 cast(
-                    "ColumnElement[bool]", StreamerBookmakerMembership.bookmaker_id == bookmaker_id,
+                    "ColumnElement[bool]",
+                    StreamerBookmakerMembership.bookmaker_id == bookmaker_id,
                 ),
                 cast("ColumnElement[bool]", StreamerBookmakerMembership.streamer_id == streamer_id),
             )
@@ -45,18 +38,3 @@ class StreamerBookmakerRepo(Repository[StreamerBookmakerMembership]):
                 referral_link=referral_link,  # type: ignore[call-arg]
             )
             await self.session.merge(new_entry)
-
-    async def get_data_bookmaker_and_streamer(
-        self,
-        streamer_name: str,
-        bookmaker_name: str,
-    ) -> Row[tuple[Streamer, Bookmaker]] | None:
-        query = (
-            select(Streamer, Bookmaker)
-            .join(Bookmaker, cast("ColumnElement[bool]", Bookmaker.name == bookmaker_name))
-            .where(cast("ColumnElement[bool]", Streamer.name == streamer_name))
-        )
-
-        result = await self.session.execute(query)
-
-        return result.fetchone()

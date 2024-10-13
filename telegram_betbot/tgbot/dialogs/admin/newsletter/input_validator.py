@@ -1,11 +1,12 @@
 from urllib.parse import urlparse
 
-from telegram_betbot.tgbot.dialogs.admin.start.input_validator import admin_check_type_validator
 from telegram_betbot.tgbot.lexicon.lexicon import LEXICON_ADMIN_ERRORS
 
 
 def admin_check_text_newsletter_validator(text: str) -> str:
-    return admin_check_type_validator(text=text)
+    if isinstance(text, str) and len(text.strip()) > 1:
+        return text
+    raise ValueError()
 
 
 def admin_check_input_text_and_url_validator(text: str) -> str:

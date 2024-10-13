@@ -1,18 +1,11 @@
 import logging
-import re
 from collections.abc import Sequence
 
-from sqlalchemy import and_
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from telegram_betbot.database import Database
-from telegram_betbot.database.models import Referral
-from telegram_betbot.tgbot.exeptions.admin import ReferralKeyUniqueError
-from telegram_betbot.tgbot.exeptions.referral import (
-    ReferralAlreadyRegisteredByYouError,
-    ReferralAlreadyRegisteredError,
-    ReferralInvalidError,
-)
+from telegram_betbot.tgbot.exeptions.admin import ReferralUpdateStatusError
+from telegram_betbot.tgbot.exeptions.referral import ReferralAlreadyRegisteredError
 
 
 logger = logging.getLogger(__name__)
@@ -22,69 +15,49 @@ class ReferralService:
     def __init__(self, db: Database):
         self.db = db
 
-    async def create_new_referral_keys(
-            self,
-            bookmaker_name: str,
-            streamer_name: str,
-            referral_keys: list[str],
+    async def update_referral_status(
+        self,
+        bookmaker_id: int,
+        streamer_id: int,
+        referral_keys: list[int],
+    ) -> None:
+        try:
+            async with self.db.referral.session.begin():
+                await self.db.referral.update_confirmed_status(
+                    streamer_id=streamer_id,
+                    bookmaker_id=bookmaker_id,
+                    referral_keys=referral_keys,
+                )
+
+                logger.info("Referral status updated")
+
+        except SQLAlchemyError as exception:
+            logger.error(exception)
+            raise ReferralUpdateStatusError(str(exception))
+
+    async def check_and_create_referral(
+        self,
+        bookmaker_name: str,
+        streamer_name: str,
+        telegram_id: int,
+        referral_key: int,
     ) -> None:
         try:
             async with self.db.referral.session.begin():
                 streamer_id, bookmaker_id = await self.db.referral.get_data_for_referal(
                     bookmaker_name=bookmaker_name,
                     streamer_name=streamer_name,
+                    telegram_id=telegram_id,
                 )
-
-                await self.db.referral.create_many_referrals_for_one_streamer_and_bm(
-                    streamer_id=streamer_id,
+                await self.db.referral.create(
+                    referral_key=referral_key,
                     bookmaker_id=bookmaker_id,
-                    referral_keys=referral_keys,
+                    streamer_id=streamer_id,
+                    telegram_id=telegram_id,
                 )
-
-                logger.info("Referral keys created")
-
         except IntegrityError as exception:
             logger.error(exception)
-
-            match = re.search(r"Key \(referral_key\)=\((\d+)\)", str(exception))
-            if match:
-                existing_referral_key = match.group(1)
-                raise ReferralKeyUniqueError(existing_referral_key)
-            raise ReferralKeyUniqueError
-
-    async def check_and_create_referral(
-            self,
-            bookmaker_name: str,
-            streamer_name: str,
-            telegram_id: int,
-            referral_key: str,
-    ) -> bool:
-        async with self.db.referral.session.begin():
-            streamer_id, bookmaker_id, user_id = await self.db.referral.get_data_for_referal(
-                bookmaker_name=bookmaker_name,
-                streamer_name=streamer_name,
-                telegram_id=telegram_id,
-            )
-            referral = await self.db.referral.get_by_where(
-                whereclause=and_(
-                    Referral.bookmaker_id == bookmaker_id,
-                    Referral.streamer_id == streamer_id,
-                    Referral.referral_key == referral_key,
-                ),
-            )
-
-            if referral and referral.user_id is not None:
-                if referral.user_id == user_id:
-                    raise ReferralAlreadyRegisteredByYouError
-                else:
-                    raise ReferralAlreadyRegisteredError
-
-            if referral:
-                referral.user_id = user_id
-                referral.telegram_id = telegram_id
-                return True
-            else:
-                raise ReferralInvalidError
+            raise ReferralAlreadyRegisteredError
 
     async def check_free_bookmakers(self, telegram_id: int) -> tuple[dict, list]:
         async with self.db.referral.session.begin():
@@ -92,13 +65,39 @@ class ReferralService:
                 telegram_id=telegram_id,
             )
 
-    async def get_referrals_by_bm_and_streamer(
-            self, streamer_name: str, bookmaker_name: str,
+    async def get_referrals_id_by_bm_and_streamer(
+        self,
+        streamer_id: int,
+        bookmaker_id: int,
     ) -> Sequence[int]:
         async with self.db.referral.session.begin():
             refs = await self.db.referral.get_ids_refs_by_streamer_name_and_bm_name(
-                streamer_name=streamer_name,
+                streamer_id=streamer_id,
+                bookmaker_id=bookmaker_id,
+            )
+            return refs
+
+    async def get_referrals_telegram_id(
+        self,
+        streamer_id: int,
+        bookmaker_id: int,
+    ) -> Sequence[int]:
+        async with self.db.referral.session.begin():
+            ref_telegram_id = await self.db.referral.get_refs_telegram_id(
+                streamer_id=streamer_id,
+                bookmaker_id=bookmaker_id,
+            )
+            return ref_telegram_id
+
+    async def get_dara_for_referral(
+        self,
+        bookmaker_name: str,
+        streamer_name: str,
+    ) -> tuple[int, int]:
+        async with self.db.referral.session.begin():
+            streamer_id, bookmaker_id = await self.db.referral.get_data_for_referal(
                 bookmaker_name=bookmaker_name,
+                streamer_name=streamer_name,
             )
 
-            return refs
+            return streamer_id, bookmaker_id

@@ -24,13 +24,8 @@ if TYPE_CHECKING:
 class Referral(Base):
     """Referral model."""
 
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id"),
-        nullable=False,
-    )
-
-    telegram_id: Mapped[int] = mapped_column(
-        BigInteger,
+    user_telegram_id: Mapped[int] = mapped_column(
+        ForeignKey("users.telegram_id"),
         nullable=False,
     )
     bookmaker_id: Mapped[int] = mapped_column(
@@ -42,7 +37,7 @@ class Referral(Base):
         nullable=False,
     )
 
-    referral_key: Mapped[str] = mapped_column(
+    referral_key: Mapped[int] = mapped_column(
         BigInteger,
         unique=True,
         nullable=False,
@@ -54,7 +49,9 @@ class Referral(Base):
         default=False,
     )
 
-    __table_args__ = (UniqueConstraint("user_id", "bookmaker_id", name="uq_user_bookmaker"),)
+    __table_args__ = (
+        UniqueConstraint("user_telegram_id", "bookmaker_id", name="uq_user_bookmaker"),
+    )
 
     bookmaker: Mapped["Bookmaker"] = relationship(
         "Bookmaker",

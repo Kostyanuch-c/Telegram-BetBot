@@ -1,8 +1,8 @@
-"""New init
+"""init migrate
 
-Revision ID: 1672ad6a53ae
+Revision ID: 52b68521f9c7
 Revises: 
-Create Date: 2024-10-12 20:00:01.531098
+Create Date: 2024-10-12 21:06:23.184052
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '1672ad6a53ae'
+revision: str = '52b68521f9c7'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -44,7 +44,6 @@ def upgrade() -> None:
     sa.UniqueConstraint('telegram_id', name=op.f('uq_users_telegram_id'))
     )
     op.create_table('referrals',
-    sa.Column('user_id', sa.BigInteger(), nullable=False),
     sa.Column('telegram_id', sa.BigInteger(), nullable=False),
     sa.Column('bookmaker_id', sa.BigInteger(), nullable=False),
     sa.Column('streamer_id', sa.BigInteger(), nullable=False),
@@ -53,10 +52,10 @@ def upgrade() -> None:
     sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
     sa.ForeignKeyConstraint(['bookmaker_id'], ['bookmakers.id'], name=op.f('fk_referrals_bookmaker_id_bookmakers')),
     sa.ForeignKeyConstraint(['streamer_id'], ['streamers.id'], name=op.f('fk_referrals_streamer_id_streamers')),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_referrals_user_id_users')),
+    sa.ForeignKeyConstraint(['telegram_id'], ['users.telegram_id'], name=op.f('fk_referrals_telegram_id_users')),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_referrals')),
     sa.UniqueConstraint('referral_key', name=op.f('uq_referrals_referral_key')),
-    sa.UniqueConstraint('user_id', 'bookmaker_id', name='uq_user_bookmaker')
+    sa.UniqueConstraint('telegram_id', 'bookmaker_id', name='uq_user_bookmaker')
     )
     op.create_table('streamer_bookmaker_memberships',
     sa.Column('streamer_id', sa.BigInteger(), nullable=False),

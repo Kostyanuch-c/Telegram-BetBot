@@ -15,8 +15,13 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from telegram_betbot.config_data.config import Config, load_config
 from telegram_betbot.config_data.redis_config import create_redis_connection
 from telegram_betbot.database.database import create_async_engine
+from telegram_betbot.tgbot.dialogs.admin.change_ref_link.dialogs import admin_change_link_dialog
+from telegram_betbot.tgbot.dialogs.admin.confirm_refs.dialogs import admin_confirm_refs_dialog
 from telegram_betbot.tgbot.dialogs.admin.newsletter.dialogs import admin_newsletter_dialog
-from telegram_betbot.tgbot.dialogs.admin.start.dialogs import admin_start_dialog
+from telegram_betbot.tgbot.dialogs.admin.start.dialogs import (
+    admin_choice_bm_and_streamer,
+    admin_start_dialog,
+)
 from telegram_betbot.tgbot.dialogs.start.dialogs import start_dialog
 from telegram_betbot.tgbot.handlers.commands import commands_router
 from telegram_betbot.tgbot.keyboards.menu_button import set_main_menu_button
@@ -53,8 +58,13 @@ async def main(config: Config):
 
     logger.info("Including routers")
     dp.include_routers(commands_router)
+
     dp.include_routers(admin_start_dialog)
+    dp.include_routers(admin_choice_bm_and_streamer)
+    dp.include_routers(admin_confirm_refs_dialog)
+    dp.include_routers(admin_change_link_dialog)
     dp.include_routers(admin_newsletter_dialog)
+
     dp.include_routers(start_dialog)
 
     logger.info("Including middlewares")

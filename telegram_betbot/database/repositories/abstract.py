@@ -48,7 +48,7 @@ class Repository(Generic[AbstractModel]):
         whereclause,
         order_by=None,
         options: list | None = None,
-    ) -> Sequence[Base]:
+    ) -> Sequence:
         """Get many models from the database with whereclause."""
         statement = select(self.type_model).where(whereclause)
         if order_by:

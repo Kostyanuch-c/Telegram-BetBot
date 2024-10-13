@@ -7,6 +7,7 @@ from aiogram_dialog.widgets.kbd import (
     Button,
     Next,
     Row,
+    SwitchTo,
     Url,
 )
 from aiogram_dialog.widgets.text import Const, Format
@@ -17,7 +18,6 @@ from telegram_betbot.tgbot.dialogs.start.getters import (
     get_bookmaker_name,
     get_registration_link,
     get_start_message,
-    get_streamer_chanel_link,
 )
 from telegram_betbot.tgbot.dialogs.start.handlers import (
     back_button_in_process_check_referal_id,
@@ -26,7 +26,6 @@ from telegram_betbot.tgbot.dialogs.start.handlers import (
     process_choice_bet_company,
     process_choice_streamer,
     process_is_referal_choice,
-    to_start_after_check,
     wrong_type_input,
 )
 from telegram_betbot.tgbot.dialogs.start.input_validator import check_referral_id_validator
@@ -89,7 +88,6 @@ start_dialog = Dialog(
             Button(text=Const("Up-x"), id="Upx", on_click=process_choice_bet_company),
         ),
         Back(Const("◀️"), id="back"),
-        getter=get_start_message,
         state=StartSG.choice_bm,
     ),
     Window(
@@ -118,8 +116,7 @@ start_dialog = Dialog(
         state=StartSG.send_link,
     ),
     Window(
-        Format(LEXICON_RU["request_id"], when=~F["dialog_data"]["wrong_id"]),
-        Format(LEXICON_RU["question_correct"], when=F["dialog_data"]["wrong_id"]),
+        Format(LEXICON_RU["request_id"]),
         TextInput(
             id="input_link_or_id",
             type_factory=check_referral_id_validator,
@@ -130,41 +127,17 @@ start_dialog = Dialog(
             func=wrong_type_input,
             content_types=ContentType.ANY,
         ),
-        Next(
-            Const("Да я уверен"),
-            id="user_is_confident",
-            when=F["dialog_data"]["wrong_id"],
-        ),
         Button(
             Const("◀️"),
             id="back_button_in_process_check_referal_id",
             on_click=back_button_in_process_check_referal_id,
         ),
         getter=get_bookmaker_name,
-        state=StartSG.check_referal_id,
-    ),
-    Window(
-        Format(LEXICON_RU["waiting_for_confirmation"]),
-        Button(
-            Const("Вернуться в начало"),
-            id="in_start",
-            on_click=to_start_after_check,
-        ),
-        state=StartSG.wrong_check,
+        state=StartSG.send_to_check_referal_id,
     ),
     Window(
         Format(LEXICON_RU["confirmation_success"]),
-        Url(
-            text=Format("Перейти в группу!"),
-            url=Format("{channel_link}"),
-            id="to_channel_link",
-        ),
-        Button(
-            Const("Вернуться в начало"),
-            id="in_start",
-            on_click=to_start_after_check,
-        ),
-        getter=get_streamer_chanel_link,
-        state=StartSG.good_check,
+        SwitchTo(Const(LEXICON_RU["to_start"]), id="to_start", state=StartSG.start),
+        state=StartSG.end_step,
     ),
 )
