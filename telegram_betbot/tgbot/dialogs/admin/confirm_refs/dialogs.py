@@ -1,3 +1,4 @@
+from aiogram import F
 from aiogram.enums import ContentType
 
 from aiogram_dialog import (
@@ -13,7 +14,7 @@ from aiogram_dialog.widgets.kbd import (
 )
 from aiogram_dialog.widgets.text import Const, Format
 
-from telegram_betbot.tgbot.dialogs.admin.confirm_refs.getters import admin_get_not_confirmed_refs
+from telegram_betbot.tgbot.dialogs.admin.confirm_refs.getters import admin_get_on_confirmed_refs
 from telegram_betbot.tgbot.dialogs.admin.confirm_refs.handlers import (
     admin_correct_input_confirmed_refs_id_handler,
 )
@@ -34,7 +35,12 @@ from telegram_betbot.tgbot.states.admin import AdminConfirmRefs, AdminSG
 admin_confirm_refs_dialog = Dialog(
     Window(
         Format(
-            LEXICON_ADMIN["list_not_confirm_refs"],
+            LEXICON_ADMIN["list_on_confirm_refs"],
+            when=F["dialog_data"]["on_confirmed_refs"],
+        ),
+        Format(
+            LEXICON_ADMIN["all_confirmed"],
+            when=~F["dialog_data"]["on_confirmed_refs"],
         ),
         TextInput(
             id="input_link_or_id",
@@ -48,12 +54,12 @@ admin_confirm_refs_dialog = Dialog(
         ),
         Cancel(Const("◀️"), id="back"),
         parse_mode="HTML",
-        getter=admin_get_not_confirmed_refs,
+        getter=admin_get_on_confirmed_refs,
         state=AdminConfirmRefs.send_confirms,
     ),
     Window(
         Format(
-            LEXICON_ADMIN["success_add_referral"],
+            LEXICON_ADMIN["success_confirm_referral"],
         ),
         Back(Const(LEXICON_ADMIN["back"]), id="back"),
         Start(

@@ -9,7 +9,6 @@ from aiogram_dialog.widgets.input import MessageInput, TextInput
 from aiogram_dialog.widgets.kbd import (
     Back,
     Button,
-    Cancel,
     Next,
     Row,
     Start,
@@ -29,7 +28,6 @@ from telegram_betbot.tgbot.dialogs.admin.newsletter.handlers import (
     admin_correct_input_body_post_handler,
     admin_correct_input_photo_for_newsletter_handler,
     admin_correct_input_url_newsletter_handler,
-    admin_error_input_text_and_url_handler,
     admin_send_newsletter,
     admin_wrong_type_input_photo_for_newsletter_handler,
 )
@@ -102,7 +100,7 @@ admin_newsletter_dialog = Dialog(
             id="input_button_text_and_link",
             type_factory=admin_check_input_text_and_url_validator,
             on_success=admin_correct_input_url_newsletter_handler,
-            on_error=admin_error_input_text_and_url_handler,
+            on_error=send_error_message_handler,
         ),
         MessageInput(
             func=wrong_type_text_message_handler,
@@ -139,7 +137,12 @@ admin_newsletter_dialog = Dialog(
             ),
             Back(text=Format("{work_with_link}"), id="back"),
         ),
-        Cancel(Const(LEXICON_ADMIN["newsletter_to_start"]), id="cancel"),
+        Start(
+            Const(LEXICON_ADMIN["newsletter_to_start"]),
+            id="in_start",
+            state=AdminSG.start,
+            mode=StartMode.RESET_STACK,
+        ),
         getter=get_data_check_newsletter_message,
         state=AdminNewsletterSG.check_newsletter,
     ),

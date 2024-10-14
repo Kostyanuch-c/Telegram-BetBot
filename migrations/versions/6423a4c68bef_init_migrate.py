@@ -1,8 +1,8 @@
-"""init migrate
+"""Init migrate
 
-Revision ID: 52b68521f9c7
+Revision ID: 6423a4c68bef
 Revises: 
-Create Date: 2024-10-12 21:06:23.184052
+Create Date: 2024-10-14 09:53:33.492323
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '52b68521f9c7'
+revision: str = '6423a4c68bef'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -23,12 +23,16 @@ def upgrade() -> None:
     op.create_table('bookmakers',
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_bookmakers')),
     sa.UniqueConstraint('name', name=op.f('uq_bookmakers_name'))
     )
     op.create_table('streamers',
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_streamers')),
     sa.UniqueConstraint('name', name=op.f('uq_streamers_name'))
     )
@@ -40,28 +44,34 @@ def upgrade() -> None:
     sa.Column('language_code', sa.Text(), nullable=True),
     sa.Column('role', sa.Enum('USER', 'ADMINISTRATOR', name='role'), nullable=False),
     sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_users')),
     sa.UniqueConstraint('telegram_id', name=op.f('uq_users_telegram_id'))
     )
     op.create_table('referrals',
-    sa.Column('telegram_id', sa.BigInteger(), nullable=False),
+    sa.Column('user_telegram_id', sa.BigInteger(), nullable=False),
     sa.Column('bookmaker_id', sa.BigInteger(), nullable=False),
     sa.Column('streamer_id', sa.BigInteger(), nullable=False),
     sa.Column('referral_key', sa.BigInteger(), nullable=False),
     sa.Column('is_confirmed', sa.Boolean(), nullable=False),
     sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['bookmaker_id'], ['bookmakers.id'], name=op.f('fk_referrals_bookmaker_id_bookmakers')),
     sa.ForeignKeyConstraint(['streamer_id'], ['streamers.id'], name=op.f('fk_referrals_streamer_id_streamers')),
-    sa.ForeignKeyConstraint(['telegram_id'], ['users.telegram_id'], name=op.f('fk_referrals_telegram_id_users')),
+    sa.ForeignKeyConstraint(['user_telegram_id'], ['users.telegram_id'], name=op.f('fk_referrals_user_telegram_id_users')),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_referrals')),
     sa.UniqueConstraint('referral_key', name=op.f('uq_referrals_referral_key')),
-    sa.UniqueConstraint('telegram_id', 'bookmaker_id', name='uq_user_bookmaker')
+    sa.UniqueConstraint('user_telegram_id', 'bookmaker_id', name='uq_user_bookmaker')
     )
     op.create_table('streamer_bookmaker_memberships',
     sa.Column('streamer_id', sa.BigInteger(), nullable=False),
     sa.Column('bookmaker_id', sa.BigInteger(), nullable=False),
     sa.Column('referral_link', sa.String(), nullable=False),
     sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['bookmaker_id'], ['bookmakers.id'], name=op.f('fk_streamer_bookmaker_memberships_bookmaker_id_bookmakers')),
     sa.ForeignKeyConstraint(['streamer_id'], ['streamers.id'], name=op.f('fk_streamer_bookmaker_memberships_streamer_id_streamers')),
     sa.PrimaryKeyConstraint('streamer_id', 'bookmaker_id', 'id', name=op.f('pk_streamer_bookmaker_memberships')),

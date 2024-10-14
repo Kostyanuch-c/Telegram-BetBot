@@ -10,7 +10,11 @@ from aiogram_dialog.widgets.kbd import (
     SwitchTo,
     Url,
 )
-from aiogram_dialog.widgets.text import Const, Format
+from aiogram_dialog.widgets.text import (
+    Case,
+    Const,
+    Format,
+)
 
 from magic_filter import F
 
@@ -29,16 +33,31 @@ from telegram_betbot.tgbot.dialogs.start.handlers import (
     wrong_type_input,
 )
 from telegram_betbot.tgbot.dialogs.start.input_validator import check_referral_id_validator
-from telegram_betbot.tgbot.lexicon.lexicon import LEXICON_RU
+from telegram_betbot.tgbot.lexicon.lexicon import LEXICON_RU, LEXICON_START_MESSAGE
 from telegram_betbot.tgbot.states.start import StartSG
 
 
 start_dialog = Dialog(
     Window(
-        Format(LEXICON_RU["start"], when=F["all_free"]),
-        Format(LEXICON_RU["start_pari"], when=F["only_pari"]),
-        Format(LEXICON_RU["start_upx"], when=F["only_upx"]),
-        Format(LEXICON_RU["start_with_all_bm"], when=F["all_bm"]),
+        Case(
+            texts={
+                "clear_user": Format(LEXICON_START_MESSAGE["base_message"]),
+                "only_pari_pending": Format(LEXICON_START_MESSAGE["base_message"]),
+                "only_upx_pending": Format(LEXICON_START_MESSAGE["base_message"]),
+                "all_pending": Format(LEXICON_START_MESSAGE["start_with_all_pending_bm"]),
+                "only_pari_confirm": Format(LEXICON_START_MESSAGE["base_message"]),
+                "only_upx_confirm": Format(LEXICON_START_MESSAGE["base_message"]),
+                "confirm_pari_pending_upx": Format(
+                    LEXICON_START_MESSAGE["start_one_confirm_one_pending_bm"],
+                ),
+                "confirm_upx_pending_pari": Format(
+                    LEXICON_START_MESSAGE["start_one_confirm_one_pending_bm"],
+                ),
+                "all_confirm": Format(LEXICON_START_MESSAGE["start_with_all_confirm_bm"]),
+                ...: Format(LEXICON_START_MESSAGE["base_message"]),
+            },
+            selector="current_state_user",
+        ),
         Row(
             Button(
                 text=Const(LEXICON_RU["yes_referal"]),
@@ -50,32 +69,12 @@ start_dialog = Dialog(
                 id="no_make_referal",
                 on_click=process_is_referal_choice,
             ),
-            when=F["one_or_more_free"],
+            when=~F["one_or_more_not_free"],
         ),
-        Url(
-            text=Format(LEXICON_RU["start_pari_button"]),
-            id="pari",
-            url=Format("{pari_link}"),
-            when=F["only_pary"],
-        ),
-        Url(
-            text=Format(LEXICON_RU["start_upx_button"]),
-            id="upx",
-            url=Format("{upx_link}"),
-            when=F["only_upx"],
-        ),
-        Row(
-            Url(
-                text=Format(LEXICON_RU["start_pari_button"]),
-                id="pari",
-                url=Format("{pari_link}"),
-            ),
-            Url(
-                text=Format(LEXICON_RU["start_upx_button"]),
-                id="upx",
-                url=Format("{upx_link}"),
-            ),
-            when=F["all_bm"],
+        Button(
+            text=Format(LEXICON_RU["start_refresh_data_button"]),
+            id="start_refresh_data_button",
+            when=F["one_or_more_not_free"],
         ),
         getter=get_start_message,
         state=StartSG.start,

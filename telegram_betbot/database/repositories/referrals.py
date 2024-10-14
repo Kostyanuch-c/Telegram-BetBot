@@ -3,7 +3,6 @@ from typing import Any, cast
 
 from sqlalchemy import (
     Row,
-    RowMapping,
     select,
     update,
 )
@@ -62,7 +61,7 @@ class ReferralRepo(Repository[Referral]):
         self,
         streamer_id: int,
         bookmaker_id: int,
-        referral_keys: list[int],
+        referral_keys: list[int] | set[int],
     ) -> None:
         query = (
             update(Referral)
@@ -97,32 +96,3 @@ class ReferralRepo(Repository[Referral]):
         ]
 
         return occupied_bookmakers, free_bookmakers
-
-    async def get_ids_refs_by_streamer_name_and_bm_name(
-        self,
-        bookmaker_id: int,
-        streamer_id: int,
-    ) -> Sequence[Row[Any] | RowMapping | Any]:
-        query = select(Referral.referral_key).where(
-            (Referral.bookmaker_id == bookmaker_id)
-            & (Referral.streamer_id == streamer_id)
-            & (Referral.is_confirmed.is_(False)),
-        )
-        result = await self.session.execute(query)
-
-        return result.scalars().all()
-
-    async def get_refs_telegram_id(
-        self,
-        bookmaker_id: int,
-        streamer_id: int,
-        is_confirmed: bool = False,
-    ):
-        query = select(Referral.user_telegram_id).where(
-            (Referral.bookmaker_id == bookmaker_id)
-            & (Referral.streamer_id == streamer_id)
-            & Referral.is_confirmed.is_(is_confirmed),
-        )
-
-        refs_telegram_id = await self.session.execute(query)
-        return refs_telegram_id.scalars().all()

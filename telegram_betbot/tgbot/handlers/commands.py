@@ -1,44 +1,75 @@
 from aiogram import F, Router
 from aiogram.filters import CommandStart
-from aiogram.types import Message, User
+from aiogram.types import CallbackQuery, Message
 
-from aiogram_dialog import DialogManager, StartMode
+from aiogram_dialog import (
+    DialogManager,
+    ShowMode,
+    StartMode,
+)
 
 from telegram_betbot.database import Database
 from telegram_betbot.tgbot.enums.role import Role
-from telegram_betbot.tgbot.services.referral_service import ReferralService
+from telegram_betbot.tgbot.handlers.utils import check_free_bookmakers, extract_user_data
 from telegram_betbot.tgbot.services.user_service import UserService
 from telegram_betbot.tgbot.states.admin import AdminSG
 from telegram_betbot.tgbot.states.start import StartSG
 
 
 commands_router = Router()
+commands_router.message.filter(F.chat.type == "private")
 
 
-def _extract_user_data(telegram_user: User) -> dict[str, any]:
-    return {
-        "telegram_id": telegram_user.id,
-        "first_name": telegram_user.first_name,
-        "last_name": telegram_user.last_name,
-        "language_code": telegram_user.language_code,
-        "user_name": telegram_user.username,
-    }
+@commands_router.callback_query(F.data.endswith("start_refresh_data_button"))
+async def start_refresh_data_button(
+    event: CallbackQuery,
+    dialog_manager: DialogManager,
+    db: Database,
+):
+    occupied_bookmakers, free_bookmakers = await check_free_bookmakers(
+        db=db,
+        dialog_manager=dialog_manager,
+        user=event.from_user,
+    )
+    dialog_manager.dialog_data.update(
+        {
+            "occupied_bookmakers": occupied_bookmakers,
+            "free_bookmakers": free_bookmakers,
+        },
+    )
+    await dialog_manager.update({}, ShowMode.SEND)
 
 
-@commands_router.message(F.chat.type == "private", CommandStart())
+# @commands_router.message(Command(commands="refresh"))
+# async def process_refresh_command(
+#         event: Message,
+#         dialog_manager: DialogManager,
+#         db: Database,
+# ):
+#     await event.answer("Данные обновленны")
+#     dialog_manager.show_mode = ShowMode.SEND
+#     await to_start_dialog(db=db, dialog_manager=dialog_manager, user=event.from_user)
+
+
+@commands_router.message(CommandStart())
 async def process_start_command(
-    message: Message,
+    event: Message,
     dialog_manager: DialogManager,
     db: Database,
 ) -> None:
-    user_data = _extract_user_data(telegram_user=message.from_user)
+    user = event.from_user
+
+    user_data = extract_user_data(telegram_user=user)
 
     user_role = await UserService(db).get_role_or_create_user(user_data)
     if user_role == Role.ADMINISTRATOR:
         await dialog_manager.start(state=AdminSG.start, mode=StartMode.RESET_STACK)
+
     else:
-        occupied_bookmakers, free_bookmakers = await ReferralService(db).check_free_bookmakers(
-            telegram_id=message.from_user.id,
+        occupied_bookmakers, free_bookmakers = await check_free_bookmakers(
+            db=db,
+            dialog_manager=dialog_manager,
+            user=user,
         )
 
         await dialog_manager.start(

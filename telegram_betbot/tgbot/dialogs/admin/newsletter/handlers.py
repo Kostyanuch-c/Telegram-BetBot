@@ -112,15 +112,6 @@ async def admin_choice_post_without_url_button(
         await dialog_manager.next()
 
 
-async def admin_error_input_text_and_url_handler(
-    message: Message,
-    widget: ManagedTextInput,
-    dialog_manager: DialogManager,
-    error: ValueError,
-):
-    await message.answer(text=str(error))
-
-
 async def admin_correct_input_url_newsletter_handler(
     message: Message,
     widget: ManagedTextInput,
@@ -165,19 +156,20 @@ async def admin_send_newsletter(
     streamer_id = dialog_manager.start_data["streamer_id"]
     bookmaker_id = dialog_manager.start_data["bookmaker_id"]
 
-    refs_ids = await ReferralService(db).get_referrals_telegram_id(
+    refs = await ReferralService(db).get_referrals_by_where(
         streamer_id=streamer_id,
         bookmaker_id=bookmaker_id,
+        is_confirmed=True,
     )
-    total_messages = len(refs_ids)
+    total_messages = len(refs)
     successfully_sent = 0
     await callback.message.answer(
         text=f"Отправляю {total_messages} сообщений, пожалуйста, подождите",
     )
 
-    for ref in refs_ids:
+    for ref in refs:
         success = await send_message_to_user(
-            ref_id=ref,
+            ref_id=ref.user_telegram_id,
             message=text,
             bot=bot,
             photo=photo,

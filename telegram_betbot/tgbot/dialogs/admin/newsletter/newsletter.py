@@ -18,11 +18,11 @@ logger = logging.getLogger(__name__)
 
 
 async def send_newsletter_message_to_admin_for_check(
-        newsletter_data: dict,
-        dialog_manager: DialogManager,
-        admin_chat_id: int,
+    newsletter_data: dict,
+    dialog_manager: DialogManager,
+    admin_chat_id: int,
 ) -> None:
-    text = newsletter_data.get('text')
+    text = newsletter_data.get("text")
     photo = newsletter_data.get("photo")
 
     keyboard_data = newsletter_data.get("keyboard_data", {})
@@ -44,11 +44,11 @@ async def send_newsletter_message_to_admin_for_check(
 
 
 async def send_message_to_user(
-        ref_id: int,
-        message: str,
-        bot: Bot,
-        photo: str,
-        keyboard: InlineKeyboardMarkup = None,
+    ref_id: int,
+    message: str,
+    bot: Bot,
+    photo: str | None = None,
+    keyboard: InlineKeyboardMarkup = None,
 ) -> bool:
     try:
         if photo:

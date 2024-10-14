@@ -46,7 +46,20 @@ async def process_choice_streamer(
     dialog_manager: DialogManager,
 ):
     user_choice = button.widget_id
-    dialog_manager.dialog_data["streamer"] = user_choice
+
+    db = dialog_manager.middleware_data["db"]
+    streamer_id, bookmaker_id = await ReferralService(db).get_dara_for_referral(
+        bookmaker_name=dialog_manager.dialog_data["bet_company"],
+        streamer_name=user_choice,
+    )
+
+    dialog_manager.dialog_data.update(
+        {
+            "streamer": user_choice,
+            "bookmaker_id": bookmaker_id,
+            "streamer_id": streamer_id,
+        },
+    )
 
     if dialog_manager.dialog_data["is_referal"]:
         await dialog_manager.switch_to(state=StartSG.send_to_check_referal_id)
@@ -85,22 +98,27 @@ async def correct_input_handler(
     referral_key: str,
 ) -> None:
     db = dialog_manager.middleware_data["db"]
+
     bookmaker = dialog_manager.dialog_data["bet_company"]
     streamer = dialog_manager.dialog_data["streamer"]
+    bookmaker_id = dialog_manager.dialog_data["bookmaker_id"]
+    streamer_id = dialog_manager.dialog_data["streamer_id"]
+
     telegram_id = message.from_user.id
     try:
         await ReferralService(db).check_and_create_referral(
             referral_key=int(referral_key),
             telegram_id=telegram_id,
-            bookmaker_name=bookmaker,
-            streamer_name=streamer,
+            bookmaker_id=bookmaker_id,
+            streamer_id=streamer_id,
         )
         free_bookmakers = dialog_manager.dialog_data["free_bookmakers"]
         occupied_bookmakers = dialog_manager.dialog_data["occupied_bookmakers"]
+
         if bookmaker in free_bookmakers:
             free_bookmakers.remove(bookmaker)
 
-        occupied_bookmakers[bookmaker] = streamer
+        occupied_bookmakers[bookmaker] = [streamer, False]
 
         dialog_manager.dialog_data.update(
             {

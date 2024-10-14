@@ -1,5 +1,12 @@
 """Base model."""
-from sqlalchemy import BigInteger, MetaData
+from datetime import datetime
+
+from sqlalchemy import (
+    BigInteger,
+    func,
+    MetaData,
+)
+from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.ext.declarative import as_declarative
 from sqlalchemy.orm import (
     declared_attr,
@@ -20,7 +27,7 @@ metadata = MetaData(
 
 
 @as_declarative(metadata=metadata)
-class Base:
+class Base(AsyncAttrs):
     """Abstract model with declarative base functionality."""
 
     __abstract__ = True
@@ -36,3 +43,5 @@ class Base:
         autoincrement=True,
         primary_key=True,
     )
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())

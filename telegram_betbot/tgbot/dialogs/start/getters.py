@@ -2,6 +2,7 @@ from aiogram.types import User
 
 from aiogram_dialog import DialogManager
 
+from telegram_betbot.tgbot.dialogs.start.start_message import create_start_message
 from telegram_betbot.tgbot.lexicon.lexicon import LEXICON_RU
 from telegram_betbot.tgbot.services.streamer_bookmaker_service import StreamerBookmakerService
 
@@ -12,6 +13,7 @@ async def get_start_message(
     **kwargs,
 ) -> dict[str, str]:
     username = event_from_user.full_name or event_from_user.username or LEXICON_RU["default_name"]
+
     if not dialog_manager.dialog_data:
         dialog_manager.dialog_data.update(dialog_manager.start_data)
 
@@ -21,46 +23,26 @@ async def get_start_message(
 
     response_data: dict = {
         "username": username,
-        "all_free": True,
-        "only_pari": False,
-        "only_upx": False,
-        "all_bm": False,
+        "status_pari": streamer_pari[1] if streamer_pari else "not_attempted",
+        "status_upx": streamer_upx[1] if streamer_upx else "not_attempted",
+        "one_or_more_not_free": False,
     }
 
-    if streamer_pari:
-        response_data.update(
-            {
-                "streamer_pari": streamer_pari[0],
-                "pari_link": "https://vk.com/im?sel=206514252",
-                "only_pari": True,
-                "all_free": False,
-            },
-        )
-
-    if streamer_upx:
-        response_data.update(
-            {
-                "streamer_upx": streamer_upx[0],
-                "upx_link": "https://vk.com/im?sel=206514252",
-                "all_free": False,
-                "only_upx": not streamer_pari,
-                "only_pari": False,
-                "all_bm": bool(streamer_pari),
-            },
-        )
-
-    response_data["one_or_more_free"] = not (streamer_pari and streamer_upx)
+    response_data = create_start_message(response_data, streamer_pari, streamer_upx)
     return response_data
 
 
 async def get_registration_link(dialog_manager: DialogManager, **kwargs) -> dict[str, str]:
     bet_company = dialog_manager.dialog_data.get("bet_company")
     streamer = dialog_manager.dialog_data.get("streamer")
+
+    bookmaker_id = dialog_manager.dialog_data["bookmaker_id"]
+    steamer_id = dialog_manager.dialog_data["streamer_id"]
     db = dialog_manager.middleware_data["db"]
 
     referral_link = await StreamerBookmakerService(db).get_referral_link(
-        bookmaker_name=bet_company,
-        streamer_name=streamer,
+        bookmaker_id=bookmaker_id,
+        streamer_id=steamer_id,
     )
 
     return {

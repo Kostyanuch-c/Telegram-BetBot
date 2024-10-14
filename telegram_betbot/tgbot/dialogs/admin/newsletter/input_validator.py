@@ -11,7 +11,7 @@ def admin_check_text_newsletter_validator(text: str) -> str:
 
 def admin_check_input_text_and_url_validator(text: str) -> str:
     words_list = text.strip().split(maxsplit=1)
-
+    # TODO сделать проверку строки как текст кнопки а втроя стра url также добавить пример в хэндлер
     if len(words_list) != 2:
         raise ValueError(LEXICON_ADMIN_ERRORS["error_invalid_format"])
 

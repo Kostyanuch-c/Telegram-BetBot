@@ -28,20 +28,12 @@ class StreamerBookmakerService:
 
             logger.info("Referral links updated")
 
-    async def get_referral_link(self, bookmaker_name: str, streamer_name: str) -> str:
+    async def get_referral_link(self, bookmaker_id: int, streamer_id: int) -> str:
         async with self.db.streamers_and_bookmakers.session.begin():
-            (
-                streamer,
-                bookmaker,
-            ) = await self.db.streamers_and_bookmakers.get_data_bookmaker_and_streamer(
-                bookmaker_name=bookmaker_name,
-                streamer_name=streamer_name,
-            )
-
             link = await self.db.streamers_and_bookmakers.get_by_where(
                 whereclause=and_(
-                    StreamerBookmakerMembership.bookmaker_id == bookmaker.id,
-                    StreamerBookmakerMembership.streamer_id == streamer.id,
+                    StreamerBookmakerMembership.bookmaker_id == bookmaker_id,
+                    StreamerBookmakerMembership.streamer_id == streamer_id,
                 ),
             )
 
