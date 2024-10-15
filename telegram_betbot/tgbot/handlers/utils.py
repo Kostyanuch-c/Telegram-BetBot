@@ -1,9 +1,14 @@
 from aiogram.types import User
 
-from aiogram_dialog import DialogManager
+from aiogram_dialog import (
+    DialogManager,
+    ShowMode,
+    StartMode,
+)
 
 from telegram_betbot.database import Database
 from telegram_betbot.tgbot.services.referral_service import ReferralService
+from telegram_betbot.tgbot.states.start import StartSG
 
 
 def extract_user_data(telegram_user: User) -> dict[str, any]:
@@ -16,13 +21,21 @@ def extract_user_data(telegram_user: User) -> dict[str, any]:
     }
 
 
-async def check_free_bookmakers(
+async def to_start_dialog(
     db: Database,
     user: User,
     dialog_manager: DialogManager,
+    show_mode: ShowMode = ShowMode.AUTO,
 ):
     occupied_bookmakers, free_bookmakers = await ReferralService(db).check_free_bookmakers(
         telegram_id=user.id,
     )
-
-    return occupied_bookmakers, free_bookmakers
+    await dialog_manager.start(
+        state=StartSG.start,
+        mode=StartMode.RESET_STACK,
+        show_mode=show_mode,
+        data={
+            "occupied_bookmakers": occupied_bookmakers,
+            "free_bookmakers": free_bookmakers,
+        },
+    )

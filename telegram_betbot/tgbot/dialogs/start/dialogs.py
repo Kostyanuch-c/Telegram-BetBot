@@ -1,6 +1,10 @@
 from aiogram.enums import ContentType
 
-from aiogram_dialog import Dialog, Window
+from aiogram_dialog import (
+    Dialog,
+    LaunchMode,
+    Window,
+)
 from aiogram_dialog.widgets.input import MessageInput, TextInput
 from aiogram_dialog.widgets.kbd import (
     Back,
@@ -71,11 +75,6 @@ start_dialog = Dialog(
             ),
             when=~F["one_or_more_not_free"],
         ),
-        Button(
-            text=Format(LEXICON_RU["start_refresh_data_button"]),
-            id="start_refresh_data_button",
-            when=F["one_or_more_not_free"],
-        ),
         getter=get_start_message,
         state=StartSG.start,
     ),
@@ -139,4 +138,5 @@ start_dialog = Dialog(
         SwitchTo(Const(LEXICON_RU["to_start"]), id="to_start", state=StartSG.start),
         state=StartSG.end_step,
     ),
+    launch_mode=LaunchMode.ROOT,
 )

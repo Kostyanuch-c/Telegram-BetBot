@@ -11,7 +11,7 @@ from aiogram.types import InlineKeyboardMarkup
 
 from aiogram_dialog import DialogManager, ShowMode
 
-from telegram_betbot.tgbot.keyboards.url_keyboard import create_keyboard_from_data
+from telegram_betbot.tgbot.keyboards.url import create_keyboard_from_data
 
 
 logger = logging.getLogger(__name__)

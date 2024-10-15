@@ -4,10 +4,12 @@ import logging
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
+from aiogram.filters import ExceptionTypeFilter
 from aiogram.fsm.storage.redis import DefaultKeyBuilder, RedisStorage
 from aiogram.fsm.strategy import FSMStrategy
 
 from aiogram_dialog import setup_dialogs
+from aiogram_dialog.api.exceptions import UnknownIntent
 
 from redis.asyncio.client import Redis
 from sqlalchemy.ext.asyncio import AsyncEngine
@@ -24,7 +26,8 @@ from telegram_betbot.tgbot.dialogs.admin.start.dialogs import (
 )
 from telegram_betbot.tgbot.dialogs.start.dialogs import start_dialog
 from telegram_betbot.tgbot.handlers.commands import commands_router
-from telegram_betbot.tgbot.keyboards.menu_button import set_main_menu_button
+from telegram_betbot.tgbot.handlers.errors import on_unknown_intent
+from telegram_betbot.tgbot.handlers.newsletters import newsletter_router
 from telegram_betbot.tgbot.middlewares.database import DatabaseMiddleware
 
 
@@ -53,11 +56,9 @@ async def main(config: Config):
         fsm_strategy=FSMStrategy.CHAT,
     )
 
-    logger.info("Set main menu buttons")
-    await set_main_menu_button(bot)
-
     logger.info("Including routers")
     dp.include_routers(commands_router)
+    dp.include_routers(newsletter_router)
 
     dp.include_routers(admin_start_dialog)
     dp.include_routers(admin_choice_bm_and_streamer)
@@ -66,6 +67,11 @@ async def main(config: Config):
     dp.include_routers(admin_newsletter_dialog)
 
     dp.include_routers(start_dialog)
+
+    dp.errors.register(
+        on_unknown_intent,
+        ExceptionTypeFilter(UnknownIntent),
+    )
 
     logger.info("Including middlewares")
     dp.update.middleware(DatabaseMiddleware())

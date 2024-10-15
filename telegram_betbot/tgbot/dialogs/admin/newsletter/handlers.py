@@ -11,7 +11,7 @@ from telegram_betbot.tgbot.dialogs.admin.newsletter.newsletter import (
     send_message_to_user,
     send_newsletter_message_to_admin_for_check,
 )
-from telegram_betbot.tgbot.keyboards.url_keyboard import create_keyboard_from_data
+from telegram_betbot.tgbot.keyboards.url import create_keyboard_from_data
 from telegram_betbot.tgbot.lexicon.lexicon import LEXICON_ADMIN_ERRORS
 from telegram_betbot.tgbot.services.referral_service import ReferralService
 from telegram_betbot.tgbot.states.admin import AdminNewsletterSG
@@ -120,7 +120,7 @@ async def admin_correct_input_url_newsletter_handler(
 ):
     dialog_manager.dialog_data["newsletter"]["changing_mod"] = True
 
-    button_text, url = text.strip().split(maxsplit=1)
+    button_text, url = text.strip().split("\n")
 
     dialog_manager.dialog_data["newsletter"]["keyboard_data"] = {
         "url": url,

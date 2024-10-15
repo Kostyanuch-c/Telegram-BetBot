@@ -1,5 +1,7 @@
 """User repository file."""
+from typing import cast
 
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from telegram_betbot.database.models import User
@@ -15,13 +17,13 @@ class UserRepo(Repository[User]):
         super().__init__(type_model=User, session=session)
 
     async def create_and_return(
-            self,
-            telegram_id: int,
-            user_name: str | None = None,
-            first_name: str | None = None,
-            last_name: str | None = None,
-            language_code: str | None = None,
-            role: Role = Role.USER,
+        self,
+        telegram_id: int,
+        user_name: str | None = None,
+        first_name: str | None = None,
+        last_name: str | None = None,
+        language_code: str | None = None,
+        role: Role = Role.USER,
     ) -> User:
         user = User(
             telegram_id=telegram_id,  # type: ignore[call-arg]
@@ -34,3 +36,15 @@ class UserRepo(Repository[User]):
 
         self.session.add(user)
         return user
+
+    async def update_user_role(
+        self,
+        telegram_id: int,
+        role: Role,
+    ) -> None:
+        query = (
+            update(User)
+            .where(cast("ColumnElement[bool]", User.telegram_id == telegram_id))
+            .values(role=role)
+        )
+        await self.session.execute(query)

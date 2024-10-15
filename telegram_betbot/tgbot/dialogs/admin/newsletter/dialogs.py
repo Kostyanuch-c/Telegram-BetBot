@@ -39,7 +39,7 @@ from telegram_betbot.tgbot.dialogs.commons.handlers import (
     send_error_message_handler,
     wrong_type_text_message_handler,
 )
-from telegram_betbot.tgbot.dialogs.commons.widgets import TO_START
+from telegram_betbot.tgbot.dialogs.commons.widgets import SWITCH_TO_NEWSLETTER, TO_START
 from telegram_betbot.tgbot.lexicon.lexicon import LEXICON_ADMIN
 from telegram_betbot.tgbot.states.admin import AdminNewsletterSG, AdminSG
 
@@ -63,12 +63,7 @@ admin_newsletter_dialog = Dialog(
             on_click=admin_button_clear_data_post,
             when=~F["dialog_data"]["newsletter"]["changing_mod"],
         ),
-        SwitchTo(
-            Const("◀️"),
-            id="to_send_newsletter",
-            state=AdminNewsletterSG.check_newsletter,
-            when=F["dialog_data"]["newsletter"]["changing_mod"],
-        ),
+        SWITCH_TO_NEWSLETTER,
         state=AdminNewsletterSG.add_text_body_post,
     ),
     Window(
@@ -87,12 +82,7 @@ admin_newsletter_dialog = Dialog(
             when=~F["dialog_data"]["newsletter"]["changing_mod"],
         ),
         Back(Const("◀️"), id="back", when=~F["dialog_data"]["newsletter"]["changing_mod"]),
-        SwitchTo(
-            Const("◀️"),
-            id="to_send_newsletter",
-            state=AdminNewsletterSG.check_newsletter,
-            when=F["dialog_data"]["newsletter"]["changing_mod"],
-        ),
+        SWITCH_TO_NEWSLETTER,
         state=AdminNewsletterSG.add_photo,
     ),
     Window(
@@ -114,12 +104,7 @@ admin_newsletter_dialog = Dialog(
             when=~F["dialog_data"]["newsletter"]["changing_mod"],
         ),
         Back(Const("◀️"), id="back", when=~F["dialog_data"]["newsletter"]["changing_mod"]),
-        SwitchTo(
-            Const("◀️"),
-            id="to_send_newsletter",
-            when=F["dialog_data"]["newsletter"]["changing_mod"],
-            state=AdminNewsletterSG.check_newsletter,
-        ),
+        SWITCH_TO_NEWSLETTER,
         state=AdminNewsletterSG.add_url_button,
     ),
     Window(

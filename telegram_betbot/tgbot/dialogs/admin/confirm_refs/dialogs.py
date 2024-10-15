@@ -7,6 +7,7 @@ from aiogram_dialog.widgets.kbd import (
     Back,
     Button,
     Cancel,
+    SwitchTo,
 )
 from aiogram_dialog.widgets.text import Const, Format
 
@@ -74,7 +75,7 @@ admin_confirm_refs_dialog = Dialog(
         Format(
             LEXICON_ADMIN["success_confirm_referral"],
         ),
-        Back(Const(LEXICON_ADMIN["back"]), id="back"),
+        SwitchTo(Const(LEXICON_ADMIN["back"]), id="back", state=AdminConfirmRefs.send_confirms),
         TO_START,
         getter=get_bookmaker_and_streamer_names_from_start_data,
         state=AdminConfirmRefs.success_confirms_end,

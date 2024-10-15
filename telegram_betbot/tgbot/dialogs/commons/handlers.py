@@ -3,7 +3,7 @@ from aiogram.types import Message
 from aiogram_dialog import DialogManager
 from aiogram_dialog.widgets.input import ManagedTextInput, MessageInput
 
-from telegram_betbot.tgbot.lexicon.lexicon import LEXICON_ADMIN
+from telegram_betbot.tgbot.lexicon.lexicon import LEXICON_ADMIN_ERRORS
 
 
 async def wrong_type_text_message_handler(
@@ -11,7 +11,7 @@ async def wrong_type_text_message_handler(
     widget: MessageInput,
     dialog_manager: DialogManager,
 ):
-    await message.answer(text=LEXICON_ADMIN["error_wrong_type_input"])
+    await message.answer(text=LEXICON_ADMIN_ERRORS["error_wrong_type_input"])
 
 
 async def send_error_message_handler(

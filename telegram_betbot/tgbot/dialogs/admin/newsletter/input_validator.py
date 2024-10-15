@@ -6,12 +6,11 @@ from telegram_betbot.tgbot.lexicon.lexicon import LEXICON_ADMIN_ERRORS
 def admin_check_text_newsletter_validator(text: str) -> str:
     if isinstance(text, str) and len(text.strip()) > 1:
         return text
-    raise ValueError()
+    raise ValueError(LEXICON_ADMIN_ERRORS["small_text"])
 
 
 def admin_check_input_text_and_url_validator(text: str) -> str:
-    words_list = text.strip().split(maxsplit=1)
-    # TODO сделать проверку строки как текст кнопки а втроя стра url также добавить пример в хэндлер
+    words_list = text.strip().split("\n")
     if len(words_list) != 2:
         raise ValueError(LEXICON_ADMIN_ERRORS["error_invalid_format"])
 
