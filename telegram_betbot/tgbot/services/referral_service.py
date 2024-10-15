@@ -101,3 +101,7 @@ class ReferralService:
             return await self.db.referral.get_free_bookmakers_for_referral(
                 telegram_id=telegram_id,
             )
+
+    async def delete_referral(self, referral_keys: list[int]) -> None:
+        async with self.db.referral.session.begin():
+            await self.db.referral.delete(whereclause=Referral.referral_key.in_(referral_keys))

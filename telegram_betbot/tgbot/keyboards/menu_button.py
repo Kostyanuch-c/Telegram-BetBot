@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 async def set_main_menu_button(bot: Bot):
+    # TODO сделать кнопки /support , /refresh и для админа /make_admin
     menu_commands = {
         "/help": LEXICON_COMMANDS["/help"],
         "/info": LEXICON_COMMANDS["/info"],

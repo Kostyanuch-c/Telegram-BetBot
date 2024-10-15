@@ -1,22 +1,19 @@
 from aiogram import F
 from aiogram.enums import ContentType
 
-from aiogram_dialog import (
-    Dialog,
-    StartMode,
-    Window,
-)
+from aiogram_dialog import Dialog, Window
 from aiogram_dialog.widgets.input import MessageInput, TextInput
 from aiogram_dialog.widgets.kbd import (
     Back,
+    Button,
     Cancel,
-    Start,
 )
 from aiogram_dialog.widgets.text import Const, Format
 
 from telegram_betbot.tgbot.dialogs.admin.confirm_refs.getters import admin_get_on_confirmed_refs
 from telegram_betbot.tgbot.dialogs.admin.confirm_refs.handlers import (
     admin_correct_input_confirmed_refs_id_handler,
+    button_all_not_confirmed_refs_handler,
 )
 from telegram_betbot.tgbot.dialogs.admin.confirm_refs.input_validators import (
     admin_check_confirmed_refs_id_validator,
@@ -28,8 +25,9 @@ from telegram_betbot.tgbot.dialogs.commons.handlers import (
     send_error_message_handler,
     wrong_type_text_message_handler,
 )
+from telegram_betbot.tgbot.dialogs.commons.widgets import TO_START
 from telegram_betbot.tgbot.lexicon.lexicon import LEXICON_ADMIN
-from telegram_betbot.tgbot.states.admin import AdminConfirmRefs, AdminSG
+from telegram_betbot.tgbot.states.admin import AdminConfirmRefs
 
 
 admin_confirm_refs_dialog = Dialog(
@@ -52,6 +50,12 @@ admin_confirm_refs_dialog = Dialog(
             func=wrong_type_text_message_handler,
             content_types=ContentType.ANY,
         ),
+        Button(
+            Const(LEXICON_ADMIN["all_not_confirm_button"]),
+            id="all_not_confirm",
+            on_click=button_all_not_confirmed_refs_handler,
+            when=F["dialog_data"]["on_confirmed_refs"],
+        ),
         Cancel(Const("◀️"), id="back"),
         parse_mode="HTML",
         getter=admin_get_on_confirmed_refs,
@@ -59,16 +63,20 @@ admin_confirm_refs_dialog = Dialog(
     ),
     Window(
         Format(
+            LEXICON_ADMIN["all_not_confirm"],
+        ),
+        Back(Const(LEXICON_ADMIN["back"]), id="back"),
+        TO_START,
+        getter=get_bookmaker_and_streamer_names_from_start_data,
+        state=AdminConfirmRefs.all_not_confirm_end,
+    ),
+    Window(
+        Format(
             LEXICON_ADMIN["success_confirm_referral"],
         ),
         Back(Const(LEXICON_ADMIN["back"]), id="back"),
-        Start(
-            Const(LEXICON_ADMIN["in_start"]),
-            id="in_start",
-            state=AdminSG.start,
-            mode=StartMode.RESET_STACK,
-        ),
+        TO_START,
         getter=get_bookmaker_and_streamer_names_from_start_data,
-        state=AdminConfirmRefs.end_confirms,
+        state=AdminConfirmRefs.success_confirms_end,
     ),
 )

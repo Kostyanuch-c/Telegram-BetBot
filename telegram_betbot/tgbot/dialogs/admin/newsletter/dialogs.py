@@ -39,6 +39,7 @@ from telegram_betbot.tgbot.dialogs.commons.handlers import (
     send_error_message_handler,
     wrong_type_text_message_handler,
 )
+from telegram_betbot.tgbot.dialogs.commons.widgets import TO_START
 from telegram_betbot.tgbot.lexicon.lexicon import LEXICON_ADMIN
 from telegram_betbot.tgbot.states.admin import AdminNewsletterSG, AdminSG
 
@@ -148,12 +149,7 @@ admin_newsletter_dialog = Dialog(
     ),
     Window(
         Format(LEXICON_ADMIN["send_success"]),
-        Start(
-            Const(LEXICON_ADMIN["in_start"]),
-            id="in_start",
-            state=AdminSG.start,
-            mode=StartMode.RESET_STACK,
-        ),
+        TO_START,
         getter=get_result_newsletter_message,
         state=AdminNewsletterSG.end_send_newsletter,
     ),

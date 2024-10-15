@@ -12,7 +12,8 @@ class AdminChoiceBmAndStreamer(StatesGroup):
 
 class AdminConfirmRefs(StatesGroup):
     send_confirms = State()
-    end_confirms = State()
+    all_not_confirm_end = State()
+    success_confirms_end = State()
 
 
 class AdminChangeRefsLink(StatesGroup):

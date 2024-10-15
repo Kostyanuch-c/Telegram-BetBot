@@ -31,13 +31,15 @@ async def start_refresh_data_button(
         dialog_manager=dialog_manager,
         user=event.from_user,
     )
+
     dialog_manager.dialog_data.update(
         {
             "occupied_bookmakers": occupied_bookmakers,
             "free_bookmakers": free_bookmakers,
         },
     )
-    await dialog_manager.update({}, ShowMode.SEND)
+
+    await dialog_manager.update({}, show_mode=ShowMode.SEND)
 
 
 # @commands_router.message(Command(commands="refresh"))
