@@ -1,21 +1,26 @@
-FROM python:3.12-slim as base
+FROM python:3.10-slim as python-base
+
+ENV POETRY_VERSION=1.5.1 \
+    POETRY_HOME=/opt/poetry \
+    POETRY_VENV=/opt/poetry-venv \
+    POETRY_CACHE_DIR=/opt/.cache
+
+FROM python-base as poetry-base
+
+RUN python3 -m venv $POETRY_VENV \
+    && $POETRY_VENV/bin/pip install -U pip setuptools \
+    && $POETRY_VENV/bin/pip install poetry==${POETRY_VERSION}
+
+FROM python-base as app
+
+COPY --from=poetry-base ${POETRY_VENV} ${POETRY_VENV}
+ENV PATH="${PATH}:${POETRY_VENV}/bin"
 
 WORKDIR /app
-
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
-
-RUN apt-get update && \
-    apt-get install -y gcc build-essential && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN pip install --upgrade pip --no-cache-dir && \
-    pip install poetry --no-cache-dir && \
-    poetry config virtualenvs.create false
-
 COPY ../poetry.lock pyproject.toml ./
 
-RUN poetry install --no-interaction --no-cache --no-root
+RUN poetry check && \
+    poetry install --no-interaction --no-cache --no-root
 
 COPY .. .
 

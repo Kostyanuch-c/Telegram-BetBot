@@ -19,7 +19,7 @@ class DatabaseConfig:
     @staticmethod
     def from_env(env: Env) -> "DatabaseConfig":
         return DatabaseConfig(
-            name=env.str("POSTGRES_DATABASE", "mydb"),
+            name=env.str("POSTGRES_DB", "mydb"),
             user=env.str("POSTGRES_USER", "user"),
             passwd=env.str("POSTGRES_PASSWORD", None),
             port=env.int("POSTGRES_PORT", 5432),

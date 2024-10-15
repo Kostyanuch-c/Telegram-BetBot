@@ -24,12 +24,12 @@ class ReferralRepo(Repository[Referral]):
         super().__init__(type_model=Referral, session=session)
 
     async def create(
-        self,
-        bookmaker_id: int,
-        streamer_id: int,
-        referral_key: int,
-        telegram_id: int,
-        is_confirmed: bool = False,
+            self,
+            bookmaker_id: int,
+            streamer_id: int,
+            referral_key: int,
+            telegram_id: int,
+            is_confirmed: bool = False,
     ) -> None:
         referral = Referral(
             bookmaker_id=bookmaker_id,  # type: ignore[call-arg]
@@ -41,10 +41,10 @@ class ReferralRepo(Repository[Referral]):
         self.session.add(referral)
 
     async def get_data_for_referal(
-        self,
-        streamer_name: str,
-        bookmaker_name: str,
-        telegram_id: int = None,
+            self,
+            streamer_name: str,
+            bookmaker_name: str,
+            telegram_id: int = None,
     ) -> Row[tuple[Any, ...] | Any] | None:
         query = (
             select(Streamer.id, Bookmaker.id)
@@ -58,10 +58,10 @@ class ReferralRepo(Repository[Referral]):
         return result.one_or_none()
 
     async def update_confirmed_status(
-        self,
-        streamer_id: int,
-        bookmaker_id: int,
-        referral_keys: list[int] | set[int],
+            self,
+            streamer_id: int,
+            bookmaker_id: int,
+            referral_keys: list[int] | set[int],
     ) -> None:
         query = (
             update(Referral)

@@ -9,4 +9,4 @@ isort-show-traceback = True
 exclude = .git,__pycache__,.venv,dist,build, */migrations/*.py, *tests*
 
 ignore =
-    W503,  D100, D101, D104, D106, E800, F821
+    W503, F821

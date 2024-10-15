@@ -86,7 +86,6 @@ async def main(config: Config):
     try:
         await dp.start_polling(
             bot,
-            # bg_factory=bg_factory,
             db_engine=db_engine,
         )
 

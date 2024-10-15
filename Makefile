@@ -42,7 +42,7 @@ build-recreate:
 
 .PHONY: init_dump
 init_dump:
-	docker compose exec db pg_restore -U $(DB_USER) -d $(DB_NAME) /app/init_dump.sql --verbose
+	docker compose exec db pg_restore -U $$POSTGRES_USER -d $$POSTGRES_DB /app/init_dump.sql --verbose
 
 .PHONY: rebuild-clean
 rebuild-clean:
