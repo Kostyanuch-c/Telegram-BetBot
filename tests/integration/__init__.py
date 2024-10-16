@@ -1,1 +1,0 @@
-"""Integrational tests."""
