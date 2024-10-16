@@ -21,7 +21,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
         name: Build Docker image
-        run: docker build -f ./buildfiles/Dockerfile .. -t ${{ secrets.DOCKERHUB_USERNAME }}/telegram-betbot:latest
+        run: docker build -f ./buildfiles/Dockerfile . -t ${{ secrets.DOCKERHUB_USERNAME }}/telegram-betbot:latest
 
       -
         name: Push Docker image
