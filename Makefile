@@ -1,3 +1,11 @@
+DC = docker compose
+DCE = docker compose exec
+EXEC = docker exec -it
+LOGS = docker logs
+APP_CONTAINER = telegram-betbot
+REDIS_CONTAINER = redis
+POSTGRES_CONTAINER = db
+
 .env:
 	test ! -f .env && cp .env.example .env
 
@@ -16,6 +24,7 @@ build:
 setup-pre-commit-hooks:
 	@poetry run pre-commit install
 
+.PHONY: generate
 install: install-dependencies setup-pre-commit-hooks
 
 # Alembic utils
@@ -38,13 +47,34 @@ project-stop:
 
 .PHONY: build-recreate
 build-recreate:
-	docker compose up --build --force-recreate
+	${DC} up --build --force-recreate
+
+.PHONY: app-logs
+app-logs:
+	${LOGS} ${APP_CONTAINER} -f
+
+.PHONY: db-logs
+db-logs:
+	${LOGS} ${POSTGRES_CONTAINER} -f
+
+.PHONY: redis-logs
+redis-logs:
+	${LOGS} ${REDIS_CONTAINER} -f
+
+.PHONY: docker-generate-migrate
+docker-generate-migrate:
+	${EXEC} ${APP_CONTAINER} poetry run alembic revision --m="$(NAME)"
+
+.PHONY: docker-migrate
+docker-migrate:
+	${EXEC} ${APP_CONTAINER} poetry run alembic upgrade head
 
 .PHONY: init_dump
+POSTGRES_USER ?= user
+POSTGRES_DB ?= mydb
 init_dump:
-	docker compose exec db pg_restore -U $$POSTGRES_USER -d $$POSTGRES_DB /app/init_dump.sql --verbose
+	${EXEC} ${POSTGRES_CONTAINER} pg_restore -U $(POSTGRES_USER) -d $(POSTGRES_DB) --data-only /app/init_dump.sql --verbose
 
-.PHONY: rebuild-clean
-rebuild-clean:
-	docker compose down -v --remove-orphans
-	docker compose up --build --force-recreate
+.PHONY: init_db
+init_db: NAME ?= initial_migration
+init_db: docker-generate-migrate docker-migrate init_dump
