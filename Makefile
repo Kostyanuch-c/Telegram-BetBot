@@ -6,6 +6,7 @@ APP_CONTAINER = telegram-betbot
 REDIS_CONTAINER = redis
 POSTGRES_CONTAINER = db
 
+.PHONY: .env
 .env:
 	test ! -f .env && cp .env.example .env
 
@@ -24,17 +25,17 @@ build:
 setup-pre-commit-hooks:
 	@poetry run pre-commit install
 
-.PHONY: generate
+.PHONY: install
 install: install-dependencies setup-pre-commit-hooks
 
 # Alembic utils
 .PHONY: generate
 generate:
-	poetry run alembic revision --m="$(NAME)" --autogenerate
+	@poetry run alembic revision --m="$(NAME)"
 
 .PHONY: migrate
 migrate:
-	poetry run alembic upgrade head
+	@poetry run alembic upgrade head
 
 # Docker utils
 .PHONY: project-start
