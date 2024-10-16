@@ -39,11 +39,11 @@ migrate:
 # Docker utils
 .PHONY: project-start
 project-start:
-	docker compose up --force-recreate ${MODE}
+	${DC} up --force-recreate ${MODE}
 
 .PHONY: project-stop
 project-stop:
-	docker compose down --remove-orphans ${MODE}
+	${DC} down --remove-orphans ${MODE}
 
 .PHONY: build-recreate
 build-recreate:
